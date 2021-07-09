@@ -772,4 +772,61 @@ hello
 b'(2) PythonRDD[48] at RDD at PythonRDD.scala:53 []\n |  ParallelCollectionRDD[35] at parallelize at PythonRDD.scala:195 []'
 
 Scneario 5:
+>>> x = spark.sql("select * from bankdata")
+21/07/09 05:30:33 WARN metastore.ObjectStore: Failed to get database global_temp, returning NoSuchObjectException
+>>> x.show(2)
++-----+----+----------+-------+---------+---------+-------+-------+----+-------+----+-----+--------+--------+-----+--------+--------+---+
+|serno| age|       job|marital|education|defaulter|balance|housing|load|contact| day|month|duration|campaign|pdays|previous|poutcome|  y|
++-----+----+----------+-------+---------+---------+-------+-------+----+-------+----+-----+--------+--------+-----+--------+--------+---+
+| null|null|       job|marital|education|defaulter|   null|housing|loan|contact|null|month|    null|    null| null|    null|poutcome|  y|
+|    1|  58|management|married| tertiary|       no|   2143|    yes|  no|unknown|   5|  may|     261|       1|   -1|       0| unknown| no|
++-----+----+----------+-------+---------+---------+-------+-------+----+-------+----+-----+--------+--------+-----+--------+--------+---+
+only showing top 2 rows
+
+>>> x.filter(x.month == "may").show(5)
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|serno|age|         job|marital|education|defaulter|balance|housing|load|contact|day|month|duration|campaign|pdays|previous|poutcome|  y|
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|    1| 58|  management|married| tertiary|       no|   2143|    yes|  no|unknown|  5|  may|     261|       1|   -1|       0| unknown| no|
+|    2| 44|  technician| single|secondary|       no|     29|    yes|  no|unknown|  5|  may|     151|       1|   -1|       0| unknown| no|
+|    3| 33|entrepreneur|married|secondary|       no|      2|    yes| yes|unknown|  5|  may|      76|       1|   -1|       0| unknown| no|
+|    4| 47| blue-collar|married|  unknown|       no|   1506|    yes|  no|unknown|  5|  may|      92|       1|   -1|       0| unknown| no|
+|    5| 33|     unknown| single|  unknown|       no|      1|     no|  no|unknown|  5|  may|     198|       1|   -1|       0| unknown| no|
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+only showing top 5 rows
+
+>>> x.filter(x.month == "may").write.saveAsTable("newtblbank")
+
+>>> spark.sql("show tables").show()
++--------+-----------+-----------+
+|database|  tableName|isTemporary|
++--------+-----------+-----------+
+| default|   bankdata|      false|
+| default| newtblbank|      false|
+| default|salarydata1|      false|
++--------+-----------+-----------+
+
+>>> spark.sql("select * from newtblbank limit 10").show()
++-----+---+------------+--------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|serno|age|         job| marital|education|defaulter|balance|housing|load|contact|day|month|duration|campaign|pdays|previous|poutcome|  y|
++-----+---+------------+--------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|    1| 58|  management| married| tertiary|       no|   2143|    yes|  no|unknown|  5|  may|     261|       1|   -1|       0| unknown| no|
+|    2| 44|  technician|  single|secondary|       no|     29|    yes|  no|unknown|  5|  may|     151|       1|   -1|       0| unknown| no|
+|    3| 33|entrepreneur| married|secondary|       no|      2|    yes| yes|unknown|  5|  may|      76|       1|   -1|       0| unknown| no|
+|    4| 47| blue-collar| married|  unknown|       no|   1506|    yes|  no|unknown|  5|  may|      92|       1|   -1|       0| unknown| no|
+|    5| 33|     unknown|  single|  unknown|       no|      1|     no|  no|unknown|  5|  may|     198|       1|   -1|       0| unknown| no|
+|    6| 35|  management| married| tertiary|       no|    231|    yes|  no|unknown|  5|  may|     139|       1|   -1|       0| unknown| no|
+|    7| 28|  management|  single| tertiary|       no|    447|    yes| yes|unknown|  5|  may|     217|       1|   -1|       0| unknown| no|
+|    8| 42|entrepreneur|divorced| tertiary|      yes|      2|    yes|  no|unknown|  5|  may|     380|       1|   -1|       0| unknown| no|
+|    9| 58|     retired| married|  primary|       no|    121|    yes|  no|unknown|  5|  may|      50|       1|   -1|       0| unknown| no|
+|   10| 43|  technician|  single|secondary|       no|    593|    yes|  no|unknown|  5|  may|      55|       1|   -1|       0| unknown| no|
++-----+---+------------+--------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+
+hdu@m1:~$ hdfs dfs -ls /user/hive/warehouse/newtblbank
+Found 4 items
+-rw-r--r--   2 hdu supergroup          0 2021-07-09 05:33 /user/hive/warehouse/newtblbank/_SUCCESS
+-rw-r--r--   2 hdu supergroup     170384 2021-07-09 05:33 /user/hive/warehouse/newtblbank/part-00000-656d6922-9bd2-4742-94d9-08bc082d131c-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup     170384 2021-07-09 05:33 /user/hive/warehouse/newtblbank/part-00001-656d6922-9bd2-4742-94d9-08bc082d131c-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup     170384 2021-07-09 05:33 /user/hive/warehouse/newtblbank/part-00002-656d6922-9bd2-4742-94d9-08bc082d131c-c000.snappy.parquet
+
 
