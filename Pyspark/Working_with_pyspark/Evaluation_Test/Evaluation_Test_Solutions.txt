@@ -1,0 +1,832 @@
+Scenario 1:
+hdfs dfs -mkdir /salary
+hdfs dfs -put Downloads/Bigdata/BigData_HESS/Evaluation_Test/sample-files-for-test/salarydet.txt /salary
+hdfs dfs -ls /salary
+
+#create table
+hive> create table salarydata1 (employee_id int, employee_name string,bonus_percentage int,yop map<string,string>) 
+    > row format delimited
+    > fields terminated by ','
+    > map keys terminated by ':';
+
+#describe your table
+hive>describe formatted salarydata1;
+# col_name            	data_type           	comment             
+	 	 
+employee_id         	int                 	                    
+employee_name       	string              	                    
+bonus_percentage    	int                 	                    
+yop                 	map<string,string>  	                    
+	 	 
+# Detailed Table Information	 	 
+Database:           	default             	 
+Owner:              	hdu                 	 
+CreateTime:         	Fri Jul 09 00:20:27 CEST 2021	 
+LastAccessTime:     	UNKNOWN             	 
+Retention:          	0                   	 
+Location:           	hdfs://m1:9000/user/hive/warehouse/salarydata1	 
+Table Type:         	MANAGED_TABLE       	 
+Table Parameters:	 	 
+	COLUMN_STATS_ACCURATE	{\"BASIC_STATS\":\"true\"}
+	numFiles            	0                   
+	numRows             	0                   
+	rawDataSize         	0                   
+	totalSize           	0                   
+	transient_lastDdlTime	1625782827          
+	 	 
+# Storage Information	 	 
+SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	 
+InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+Storage Desc Params:	 	 
+	field.delim         	,                   
+	mapkey.delim        	:                   
+	serialization.format	,                   
+Time taken: 0.17 seconds, Fetched: 35 row(s)
+
+#Load data into table from hdfs
+hive> load data inpath '/salary/salarydet.txt' overwrite into table salarydata1;
+Loading data to table default.salarydata1
+OK
+Time taken: 0.602 seconds
+
+#test if data was loaded
+hive> select * from salarydata1 limit 2;
+OK
+10	smith	10	{"1styear":"21000"}
+20	peter	10	{"1styear":"410000"}
+Time taken: 0.74 seconds, Fetched: 2 row(s)
+
+#set configuration to print headers of your table
+hive> set hive.cli.print.header=true;
+hive> select * from salarydata1 limit 2;
+OK
+salarydata1.employee_id	salarydata1.employee_name	salarydata1.bonus_percentage	salarydata1.yop
+10	smith	10	{"1styear":"21000"}
+20	peter	10	{"1styear":"410000"}
+Time taken: 0.125 seconds, Fetched: 2 row(s)
+
+
+#check now if ur hdfs directory still has file ( shouldn't have, as data loaded from hdfs into hive table , which moves the file)
+hive> !hdfs dfs -ls /salary;
+
+#similary check your default hive location and if file exists there
+
+hive>!hdfs dfs -ls -R /user/hive/warehouse;
+drwxr-xr-x   - hdu supergroup          0 2021-07-09 00:00 /user/hive/warehouse/salarydata1
+-rwxr-xr-x   2 hdu supergroup        408 2021-07-08 23:57 /user/hive/warehouse/salarydata1/salarydet.txt
+
+#start querying
+1.hive> select employee_id,employee_name,bonus_percentage,yop,yop["1styear"] as salary from salarydata1;
+OK
+employee_id	employee_name	bonus_percentage	yop	salary
+10	smith	10	{"1styear":"21000"}	21000
+20	peter	10	{"1styear":"410000"}	410000
+30	marie	10	{"1styear":"551000"}	551000
+40	aj	10	{"1styear":"610000"}	610000
+50	daj	10	{"1styear":"710000"}	710000
+60	john	10	{"2ndyear":"10000"}	NULL
+70	julie	10	{"1styear":"310000"}	310000
+80	july	10	{"1styear":"122000"}	122000
+90	nicole	10	{"1styear":"110000"}	110000
+100	amar	10	{"3rdyear":"123000"}	NULL
+101	angela	10	{"1styear":"109000"}	109000
+102	mark	10	{"1styear":"110000"}	110000
+103	marc	10	{"1styear":"110000"}	110000
+104	cool_guy	10	{"1styear":"120000"}	120000
+105	stepie	10	{"1styear":"10000"}	10000
+Time taken: 0.14 seconds, Fetched: 15 row(s)
+
+2.hive> select employee_id,employee_name,bonus_percentage,yop,yop["1styear"] as salary from salarydata1 order by yop["1styear"] desc ;
+WARNING: Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+Query ID = hdu_20210709002446_56b5432f-65be-4d5e-b4b0-7ea649273334
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1625750270489_0005, Tracking URL = http://m2:8088/proxy/application_1625750270489_0005/
+Kill Command = /usr/local/hadoop-2.7.2/bin/hadoop job  -kill job_1625750270489_0005
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2021-07-09 00:25:02,962 Stage-1 map = 0%,  reduce = 0%
+2021-07-09 00:25:10,527 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 0.82 sec
+2021-07-09 00:25:15,911 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 2.12 sec
+MapReduce Total cumulative CPU time: 2 seconds 120 msec
+Ended Job = job_1625750270489_0005
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 2.12 sec   HDFS Read: 9457 HDFS Write: 766 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 120 msec
+OK
+employee_id	employee_name	bonus_percentage	yop	salary
+50	daj	10	{"1styear":"710000"}	710000
+40	aj	10	{"1styear":"610000"}	610000
+30	marie	10	{"1styear":"551000"}	551000
+20	peter	10	{"1styear":"410000"}	410000
+70	julie	10	{"1styear":"310000"}	310000
+10	smith	10	{"1styear":"21000"}	21000
+80	july	10	{"1styear":"122000"}	122000
+104	cool_guy	10	{"1styear":"120000"}	120000
+90	nicole	10	{"1styear":"110000"}	110000
+102	mark	10	{"1styear":"110000"}	110000
+103	marc	10	{"1styear":"110000"}	110000
+101	angela	10	{"1styear":"109000"}	109000
+105	stepie	10	{"1styear":"10000"}	10000
+100	amar	10	{"3rdyear":"123000"}	NULL
+60	john	10	{"2ndyear":"10000"}	NULL
+Time taken: 31.906 seconds, Fetched: 15 row(s)
+
+2.Option 2:
+hive> select employee_id,employee_name,bonus_percentage,yop,yop["1styear"] as salary from salarydata1 order by salary desc ;
+WARNING: Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+Query ID = hdu_20210709002739_2db95d54-a1d3-41f8-8ac9-12c70b7593c1
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1625750270489_0006, Tracking URL = http://m2:8088/proxy/application_1625750270489_0006/
+Kill Command = /usr/local/hadoop-2.7.2/bin/hadoop job  -kill job_1625750270489_0006
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2021-07-09 00:27:55,045 Stage-1 map = 0%,  reduce = 0%
+2021-07-09 00:28:07,732 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 8.27 sec
+2021-07-09 00:28:15,438 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 11.08 sec
+MapReduce Total cumulative CPU time: 11 seconds 80 msec
+Ended Job = job_1625750270489_0006
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 11.08 sec   HDFS Read: 9456 HDFS Write: 766 SUCCESS
+Total MapReduce CPU Time Spent: 11 seconds 80 msec
+OK
+employee_id	employee_name	bonus_percentage	yop	salary
+50	daj	10	{"1styear":"710000"}	710000
+40	aj	10	{"1styear":"610000"}	610000
+30	marie	10	{"1styear":"551000"}	551000
+20	peter	10	{"1styear":"410000"}	410000
+70	julie	10	{"1styear":"310000"}	310000
+10	smith	10	{"1styear":"21000"}	21000
+80	july	10	{"1styear":"122000"}	122000
+104	cool_guy	10	{"1styear":"120000"}	120000
+90	nicole	10	{"1styear":"110000"}	110000
+102	mark	10	{"1styear":"110000"}	110000
+103	marc	10	{"1styear":"110000"}	110000
+101	angela	10	{"1styear":"109000"}	109000
+105	stepie	10	{"1styear":"10000"}	10000
+100	amar	10	{"3rdyear":"123000"}	NULL
+60	john	10	{"2ndyear":"10000"}	NULL
+Time taken: 38.667 seconds, Fetched: 15 row(s)
+
+3.
+hive> select round((bonus_percentage/100*yop["1styear"])+yop["1styear"]) as salary from salarydata1 order by salary desc;
+WARNING: Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+Query ID = hdu_20210709003020_c2071916-55d2-42df-b970-cd659a264f68
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1625750270489_0007, Tracking URL = http://m2:8088/proxy/application_1625750270489_0007/
+Kill Command = /usr/local/hadoop-2.7.2/bin/hadoop job  -kill job_1625750270489_0007
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2021-07-09 00:30:28,782 Stage-1 map = 0%,  reduce = 0%
+2021-07-09 00:30:35,107 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.37 sec
+2021-07-09 00:30:47,603 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.86 sec
+MapReduce Total cumulative CPU time: 5 seconds 860 msec
+Ended Job = job_1625750270489_0007
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 5.86 sec   HDFS Read: 10396 HDFS Write: 388 SUCCESS
+Total MapReduce CPU Time Spent: 5 seconds 860 msec
+OK
+salary
+781000.0
+671000.0
+606100.0
+451000.0
+341000.0
+134200.0
+132000.0
+121000.0
+121000.0
+121000.0
+119900.0
+23100.0
+11000.0
+NULL
+NULL
+Time taken: 28.845 seconds, Fetched: 15 row(s)
+
+4.
+hive> select round(sum(round((bonus_percentage/100*yop["1styear"])+yop["1styear"]))) as salary from salarydata1 order by salary desc;
+WARNING: Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+Query ID = hdu_20210709003715_d4d30f1e-29df-4475-b784-be1c9fe704f7
+Total jobs = 2
+Launching Job 1 out of 2
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1625750270489_0008, Tracking URL = http://m2:8088/proxy/application_1625750270489_0008/
+Kill Command = /usr/local/hadoop-2.7.2/bin/hadoop job  -kill job_1625750270489_0008
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2021-07-09 00:37:31,794 Stage-1 map = 0%,  reduce = 0%
+2021-07-09 00:37:44,688 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 9.78 sec
+2021-07-09 00:37:53,368 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 13.85 sec
+MapReduce Total cumulative CPU time: 13 seconds 850 msec
+Ended Job = job_1625750270489_0008
+Launching Job 2 out of 2
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1625750270489_0009, Tracking URL = http://m2:8088/proxy/application_1625750270489_0009/
+Kill Command = /usr/local/hadoop-2.7.2/bin/hadoop job  -kill job_1625750270489_0009
+Hadoop job information for Stage-2: number of mappers: 1; number of reducers: 1
+2021-07-09 00:38:11,414 Stage-2 map = 0%,  reduce = 0%
+2021-07-09 00:38:18,950 Stage-2 map = 100%,  reduce = 0%, Cumulative CPU 2.01 sec
+2021-07-09 00:38:26,432 Stage-2 map = 100%,  reduce = 100%, Cumulative CPU 3.38 sec
+MapReduce Total cumulative CPU time: 3 seconds 380 msec
+Ended Job = job_1625750270489_0009
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 13.85 sec   HDFS Read: 10753 HDFS Write: 121 SUCCESS
+Stage-Stage-2: Map: 1  Reduce: 1   Cumulative CPU: 3.38 sec   HDFS Read: 4654 HDFS Write: 109 SUCCESS
+Total MapReduce CPU Time Spent: 17 seconds 230 msec
+OK
+salary
+3633300.0
+Time taken: 72.132 seconds, Fetched: 1 row(s)
+
+5.
+
+#creating external table pointing to same location as your existing managed table
+hive> create external table salarydata2 (employee_id int, employee_name string,bonus_percentage int,yop map<string,string>) 
+    > row format delimited
+    > fields terminated by ','
+    > map keys terminated by ':'
+    > location '/user/hive/warehouse/salarydata1';
+OK
+Time taken: 0.137 seconds
+
+#querying external table
+hive> select * from salarydata2;
+OK
+salarydata2.employee_id	salarydata2.employee_name	salarydata2.bonus_percentage	salarydata2.yop
+10	smith	10	{"1styear":"21000"}
+20	peter	10	{"1styear":"410000"}
+30	marie	10	{"1styear":"551000"}
+40	aj	10	{"1styear":"610000"}
+50	daj	10	{"1styear":"710000"}
+60	john	10	{"2ndyear":"10000"}
+70	julie	10	{"1styear":"310000"}
+80	july	10	{"1styear":"122000"}
+90	nicole	10	{"1styear":"110000"}
+100	amar	10	{"3rdyear":"123000"}
+101	angela	10	{"1styear":"109000"}
+102	mark	10	{"1styear":"110000"}
+103	marc	10	{"1styear":"110000"}
+104	cool_guy	10	{"1styear":"120000"}
+105	stepie	10	{"1styear":"10000"}
+Time taken: 0.125 seconds, Fetched: 15 row(s)
+
+hive>drop table salarydata2;
+
+#from PySpark
+>pyspark
+
+>>> spark.sql('select * from salarydata1')
+DataFrame[employee_id: int, employee_name: string, bonus_percentage: int, yop: map<string,string>]
+
+>>> spark.sql('select * from salarydata1').show()
++-----------+-------------+----------------+-------------------+                
+|employee_id|employee_name|bonus_percentage|                yop|
++-----------+-------------+----------------+-------------------+
+|         10|        smith|              10| [1styear -> 21000]|
+|         20|        peter|              10|[1styear -> 410000]|
+|         30|        marie|              10|[1styear -> 551000]|
+|         40|           aj|              10|[1styear -> 610000]|
+|         50|          daj|              10|[1styear -> 710000]|
+|         60|         john|              10| [2ndyear -> 10000]|
+|         70|        julie|              10|[1styear -> 310000]|
+|         80|         july|              10|[1styear -> 122000]|
+|         90|       nicole|              10|[1styear -> 110000]|
+|        100|         amar|              10|[3rdyear -> 123000]|
+|        101|       angela|              10|[1styear -> 109000]|
+|        102|         mark|              10|[1styear -> 110000]|
+|        103|         marc|              10|[1styear -> 110000]|
+|        104|     cool_guy|              10|[1styear -> 120000]|
+|        105|       stepie|              10| [1styear -> 10000]|
++-----------+-------------+----------------+-------------------+
+
+>>> df = spark.sql('select employee_id,employee_name,bonus_percentage,yop,yop["1styear"] as salary from salarydata1 order by salary desc')
+
+>>> df.write.format('json').save('mydata')
+
+>>> df.write.save('mydata-parq')
+
+#checking in hdfs if data was written
+#the files were written in /user/hdu/mydata* folders as '.save' option did mention only directory name and not path on hdfs
+#thus the files were written in '/user/hdu' directory for the user 'hdu'
+drwxr-xr-x   - hdu supergroup          0 2021-07-09 00:56 /user/hdu/mydata
+drwxr-xr-x   - hdu supergroup          0 2021-07-09 00:58 /user/hdu/mydata-parq
+hdu@m1:~$ hdfs dfs -ls /user/hdu/mydata
+Found 13 items
+-rw-r--r--   2 hdu supergroup          0 2021-07-09 00:56 /user/hdu/mydata/_SUCCESS
+-rw-r--r--   2 hdu supergroup        108 2021-07-09 00:56 /user/hdu/mydata/part-00000-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        107 2021-07-09 00:56 /user/hdu/mydata/part-00001-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        110 2021-07-09 00:56 /user/hdu/mydata/part-00002-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        110 2021-07-09 00:56 /user/hdu/mydata/part-00003-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        110 2021-07-09 00:56 /user/hdu/mydata/part-00004-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        108 2021-07-09 00:56 /user/hdu/mydata/part-00005-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        109 2021-07-09 00:56 /user/hdu/mydata/part-00006-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        114 2021-07-09 00:56 /user/hdu/mydata/part-00007-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        331 2021-07-09 00:56 /user/hdu/mydata/part-00008-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        112 2021-07-09 00:56 /user/hdu/mydata/part-00009-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        110 2021-07-09 00:56 /user/hdu/mydata/part-00010-69704592-6576-49a4-8042-191dd2e981be-c000.json
+-rw-r--r--   2 hdu supergroup        182 2021-07-09 00:56 /user/hdu/mydata/part-00011-69704592-6576-49a4-8042-191dd2e981be-c000.json
+
+hdu@m1:~$ hdfs dfs -ls /user/hdu/mydata-parq
+Found 13 items
+-rw-r--r--   2 hdu supergroup          0 2021-07-09 00:58 /user/hdu/mydata-parq/_SUCCESS
+-rw-r--r--   2 hdu supergroup       1653 2021-07-09 00:58 /user/hdu/mydata-parq/part-00000-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1644 2021-07-09 00:58 /user/hdu/mydata-parq/part-00001-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1673 2021-07-09 00:58 /user/hdu/mydata-parq/part-00002-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1673 2021-07-09 00:58 /user/hdu/mydata-parq/part-00003-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1673 2021-07-09 00:58 /user/hdu/mydata-parq/part-00004-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1656 2021-07-09 00:58 /user/hdu/mydata-parq/part-00005-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1662 2021-07-09 00:58 /user/hdu/mydata-parq/part-00006-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1700 2021-07-09 00:58 /user/hdu/mydata-parq/part-00007-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1773 2021-07-09 00:58 /user/hdu/mydata-parq/part-00008-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1682 2021-07-09 00:58 /user/hdu/mydata-parq/part-00009-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1665 2021-07-09 00:58 /user/hdu/mydata-parq/part-00010-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup       1552 2021-07-09 00:58 /user/hdu/mydata-parq/part-00011-8139a89c-5039-4b79-b481-08bc5886ba11-c000.snappy.parquet
+
+#Writing into one file instead of mutiple files with mode as overwrite
+>>> df.repartition(1).write.mode('overwrite').save('mydata-parq')
+>>> df.repartition(1).write.format('json').mode('overwrite').save('mydata')
+
+hdu@m1:~$ hdfs dfs -ls /user/hdu/mydata-parq
+Found 2 items
+-rw-r--r--   2 hdu supergroup          0 2021-07-09 01:05 /user/hdu/mydata-parq/_SUCCESS
+-rw-r--r--   2 hdu supergroup       1980 2021-07-09 01:05 /user/hdu/mydata-parq/part-00000-4a86be5c-aefe-424c-ac3d-b6c9e6518a89-c000.snappy.parquet
+hdu@m1:~$ hdfs dfs -ls /user/hdu/mydata
+Found 2 items
+-rw-r--r--   2 hdu supergroup          0 2021-07-09 01:06 /user/hdu/mydata/_SUCCESS
+-rw-r--r--   2 hdu supergroup       1611 2021-07-09 01:06 /user/hdu/mydata/part-00000-62b43389-1bea-486c-95e3-f5dcbaf40a03-c000.json
+
+#Optional
+#Reading files from hdfs location
+RDD
+>>> x = sc.textFile("/user/hive/warehouse/salarydata1/salarydet.txt")
+>>> x.collect()
+['10,smith,10,1styear:21000', '20,peter,10,1styear:410000', '30,marie,10,1styear:551000', '40,aj,10,1styear:610000', '50,daj,10,1styear:710000', '60,john,10,2ndyear:10000', '70,julie,10,1styear:310000', '80,july,10,1styear:122000', '90,nicole,10,1styear:110000', '100,amar,10,3rdyear:123000', '101,angela,10,1styear:109000', '102,mark,10,1styear:110000', '103,marc,10,1styear:110000', '104,cool_guy,10,1styear:120000', '105,stepie,10,1styear:10000']
+
+Dataframe
+#one of the ways
+>>> x = spark.read.format("text").option("delimiter",",").load("/user/hive/warehouse/salarydata1/salarydet.txt")
+>>> x.show()
++--------------------+                                                          
+|               value|
++--------------------+
+|10,smith,10,1stye...|
+|20,peter,10,1stye...|
+|30,marie,10,1stye...|
+|40,aj,10,1styear:...|
+|50,daj,10,1styear...|
+|60,john,10,2ndyea...|
+|70,julie,10,1stye...|
+|80,july,10,1styea...|
+|90,nicole,10,1sty...|
+|100,amar,10,3rdye...|
+|101,angela,10,1st...|
+|102,mark,10,1stye...|
+|103,marc,10,1stye...|
+|104,cool_guy,10,1...|
+|105,stepie,10,1st...|
++--------------------+
+
+>>> x.first()
+Row(value='10,smith,10,1styear:21000')
+
+Scenario 2:
+hdu@m1:~$ hdfs dfs -mkdir /sentiments
+hdu@m1:~$ hdfs dfs -put Downloads/Bigdata/BigData_HESS/Evaluation_Test/sample-files-for-test/cv* /sentiments
+hdu@m1:~$ hdfs dfs -ls /sentiments
+Found 1 items
+-rw-r--r--   2 hdu supergroup       4043 2021-07-09 01:28 /sentiments/cv000_29416.txt
+
+>pyspark
+>>> x = sc.textFile("/sentiments/cv000_29416.txt")
+>>> y = x.flatMap(lambda line: line.split(" ")) \
+...              .map(lambda word: (word, 1)) \
+...              .reduceByKey(lambda a, b: a + b)
+>>> y.collect()
+
+>>>y.count()
+354
+
+>>> z = y.take(10)
+>>> for i in z:
+...     print(i)
+... 
+('i', 7)
+('guess', 2)
+('line', 1)
+('movies', 1)
+('like', 3)
+('this', 10)
+('is', 12)
+('always', 1)
+('make', 5)
+('sure', 1)
+
+>>> y.saveAsTextFile("result")
+>>> quit()
+
+hdu@m1:~$ hdfs dfs -ls /user/hdu/result
+Found 3 items
+-rw-r--r--   2 hdu supergroup          0 2021-07-09 01:38 /user/hdu/result/_SUCCESS
+-rw-r--r--   2 hdu supergroup       2149 2021-07-09 01:38 /user/hdu/result/part-00000
+-rw-r--r--   2 hdu supergroup       2550 2021-07-09 01:38 /user/hdu/result/part-00001
+
+>>> y.repartition(1).saveAsTextFile("result1")
+>>> quit()                                                                      
+hdu@m1:~$ hdfs dfs -ls /user/hdu/result1
+Found 2 items
+-rw-r--r--   2 hdu supergroup          0 2021-07-09 01:42 /user/hdu/result1/_SUCCESS
+-rw-r--r--   2 hdu supergroup       4699 2021-07-09 01:42 /user/hdu/result1/part-00000
+
+Scenario 3:
+hdu@m1:~$ hdfs dfs -put Downloads/Bigdata/BigData_HESS/Evaluation_Test/sample-files-for-test/Ban* /
+hdu@m1:~$ hdfs dfs -ls /
+Found 5 items
+-rw-r--r--   2 hdu supergroup    3966262 2021-07-09 01:47 /Bank_full.csv
+drwxr-xr-x   - hdu supergroup          0 2021-07-09 00:22 /salary
+drwxr-xr-x   - hdu supergroup          0 2021-07-09 01:28 /sentiments
+drwxrwx---   - hdu supergroup          0 2021-07-07 12:19 /tmp
+drwxr-xr-x   - hdu supergroup          0 2021-07-08 23:41 /user
+
+#create table
+hive> create table bankdata(serNo int,age int,job string,marital string,education string,defaulter string,balance int,housing string,load string,contact string,
+    > day int,month string,duration int,campaign int,pdays int,previous int,poutcome string,y string)
+    > row format delimited
+    > fields terminated by ',';
+
+#if data contains first row as header, then we alter table to skip header
+hive> ALTER TABLE bankdata SET TBLPROPERTIES ("skip.header.line.count"="1");
+OK
+Time taken: 0.172 seconds
+
+#load data
+hive> load data local inpath 'Downloads/Bigdata/BigData_HESS/Evaluation_Test/sample-files-for-test/Bank_full.csv' overwrite into table bankdata;
+Loading data to table default.bankdata
+OK
+Time taken: 0.392 seconds
+
+hive> select * from bankdata limit 2;
+OK
+1	58	management	married	tertiary	no	2143	yes	no	unknown	5	may	261	1	-1	0	unknown	no
+2	44	technician	single	secondary	no	29	yes	no	unknown	5	may	151	1	-1	0	unknown	no
+Time taken: 0.154 seconds, Fetched: 2 row(s)
+
+#running a count
+    > select count(*) from bankdata;
+WARNING: Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+Query ID = hdu_20210709023404_d44c8485-4cd5-4191-b790-560e4e758402
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1625750270489_0015, Tracking URL = http://m2:8088/proxy/application_1625750270489_0015/
+Kill Command = /usr/local/hadoop-2.7.2/bin/hadoop job  -kill job_1625750270489_0015
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2021-07-09 02:34:12,774 Stage-1 map = 0%,  reduce = 0%
+2021-07-09 02:34:18,101 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 0.97 sec
+2021-07-09 02:34:23,498 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 2.7 sec
+MapReduce Total cumulative CPU time: 2 seconds 700 msec
+Ended Job = job_1625750270489_0015
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 2.7 sec   HDFS Read: 3975869 HDFS Write: 105 SUCCESS
+Total MapReduce CPU Time Spent: 2 seconds 700 msec
+OK
+45211
+Time taken: 20.812 seconds, Fetched: 1 row(s)
+
+#Loading data using same file multiple times
+hive> load data local inpath 'Downloads/Bigdata/BigData_HESS/Evaluation_Test/sample-files-for-test/Bank_full.csv' into table bankdata;
+Loading data to table default.bankdata
+OK
+Time taken: 0.41 seconds
+hive> load data local inpath 'Downloads/Bigdata/BigData_HESS/Evaluation_Test/sample-files-for-test/Bank_full.csv' into table bankdata;
+Loading data to table default.bankdata
+OK
+Time taken: 0.333 seconds
+hive> !hdfs dfs -ls /user/hive/warehouse/bankdata;
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/usr/local/apache-hive-2.1.1-bin/lib/log4j-slf4j-impl-2.4.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/local/hadoop-2.7.2/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Found 3 items
+-rwxr-xr-x   2 hdu supergroup    3966262 2021-07-09 02:31 /user/hive/warehouse/bankdata/Bank_full.csv
+-rwxr-xr-x   2 hdu supergroup    3966262 2021-07-09 02:35 /user/hive/warehouse/bankdata/Bank_full_copy_1.csv
+-rwxr-xr-x   2 hdu supergroup    3966262 2021-07-09 02:35 /user/hive/warehouse/bankdata/Bank_full_copy_2.csv
+
+#testing count again
+hive> select count(*) from bankdata;
+WARNING: Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+Query ID = hdu_20210709023550_bce3f971-20af-427d-8e05-5bb2beb7641d
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1625750270489_0016, Tracking URL = http://m2:8088/proxy/application_1625750270489_0016/
+Kill Command = /usr/local/hadoop-2.7.2/bin/hadoop job  -kill job_1625750270489_0016
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2021-07-09 02:35:57,019 Stage-1 map = 0%,  reduce = 0%
+2021-07-09 02:36:02,279 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.24 sec
+2021-07-09 02:36:08,742 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 3.79 sec
+MapReduce Total cumulative CPU time: 3 seconds 790 msec
+Ended Job = job_1625750270489_0016
+MapReduce Jobs Launched: 
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 3.79 sec   HDFS Read: 11908566 HDFS Write: 106 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 790 msec
+OK
+135633
+Time taken: 19.209 seconds, Fetched: 1 row(s)
+
+#running queries
+select education,count(*) as count from bankdata group by education;
+primary	20553
+secondary	69606
+tertiary	39903
+unknown	5571
+
+select education,count(*) as count from bankdata where age > 80 group by education;
+
+primary	177
+secondary	54
+tertiary	33
+unknown	33
+Time taken: 33.055 seconds, Fetched: 4 row(s)
+
+select age,education,count(*) as count from bankdata group by age,education;
+
+18	primary	9
+18	secondary	6
+18	unknown	21
+19	primary	27
+19	secondary	51
+19	unknown	27
+20	primary	18
+20	secondary	78
+20	tertiary	9
+20	unknown	45
+21	primary	30
+21	secondary	162
+21	tertiary	18
+...
+select age,education,count(*) as count from bankdata group by age,education order by count desc limit 10;
+
+32	secondary	3264
+31	secondary	3195
+33	secondary	3033
+34	secondary	3000
+35	secondary	2928
+36	secondary	2817
+30	secondary	2739
+37	secondary	2730
+38	secondary	2343
+39	secondary	2334
+Time taken: 69.081 seconds, Fetched: 10 row(s)
+
+select marital,y,count(*) as count from bankdata group by marital,y;
+
+divorced	no	13755
+divorced	yes	1866
+married	no	73377
+married	yes	8265
+single	no	32634
+single	yes	5736
+Time taken: 21.389 seconds, Fetched: 6 row(s)
+
+select marital,y,avg(balance),count(*) as count from bankdata group by marital,y;
+
+divorced	no	1107.0957470010906	13755
+divorced	yes	1707.9646302250803	1866
+married	no	1370.7462283821906	73377
+married	yes	1915.810163339383	8265
+single	no	1235.8699209413496	32634
+single	yes	1674.8755230125523	5736
+Time taken: 20.515 seconds, Fetched: 6 row(s)
+
+PySpark:
+
+Dataframe:
+
+>>> df = spark.read.format("csv").option("header","true").option("inferSchema","true").load("/Bank_full.csv")
+>>> df.show(5)                                                                  
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|serNo|age|         job|marital|education|defaulter|balance|housing|loan|contact|day|month|duration|campaign|pdays|previous|poutcome|  y|
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|    1| 58|  management|married| tertiary|       no|   2143|    yes|  no|unknown|  5|  may|     261|       1|   -1|       0| unknown| no|
+|    2| 44|  technician| single|secondary|       no|     29|    yes|  no|unknown|  5|  may|     151|       1|   -1|       0| unknown| no|
+|    3| 33|entrepreneur|married|secondary|       no|      2|    yes| yes|unknown|  5|  may|      76|       1|   -1|       0| unknown| no|
+|    4| 47| blue-collar|married|  unknown|       no|   1506|    yes|  no|unknown|  5|  may|      92|       1|   -1|       0| unknown| no|
+|    5| 33|     unknown| single|  unknown|       no|      1|     no|  no|unknown|  5|  may|     198|       1|   -1|       0| unknown| no|
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+only showing top 5 rows
+
+>>> df.filter(df.marital == "married").show(5)
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|serNo|age|         job|marital|education|defaulter|balance|housing|loan|contact|day|month|duration|campaign|pdays|previous|poutcome|  y|
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|    1| 58|  management|married| tertiary|       no|   2143|    yes|  no|unknown|  5|  may|     261|       1|   -1|       0| unknown| no|
+|    3| 33|entrepreneur|married|secondary|       no|      2|    yes| yes|unknown|  5|  may|      76|       1|   -1|       0| unknown| no|
+|    4| 47| blue-collar|married|  unknown|       no|   1506|    yes|  no|unknown|  5|  may|      92|       1|   -1|       0| unknown| no|
+|    6| 35|  management|married| tertiary|       no|    231|    yes|  no|unknown|  5|  may|     139|       1|   -1|       0| unknown| no|
+|    9| 58|     retired|married|  primary|       no|    121|    yes|  no|unknown|  5|  may|      50|       1|   -1|       0| unknown| no|
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+
+>>>df.filter(df.marital == "married").count()
+27214
+
+>>> df.filter((df.marital == "married") & (df.job == "blue-collar")).show(5)
++-----+---+-----------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|serNo|age|        job|marital|education|defaulter|balance|housing|loan|contact|day|month|duration|campaign|pdays|previous|poutcome|  y|
++-----+---+-----------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|    4| 47|blue-collar|married|  unknown|       no|   1506|    yes|  no|unknown|  5|  may|      92|       1|   -1|       0| unknown| no|
+|   18| 57|blue-collar|married|  primary|       no|     52|    yes|  no|unknown|  5|  may|      38|       1|   -1|       0| unknown| no|
+|   21| 28|blue-collar|married|secondary|       no|    723|    yes| yes|unknown|  5|  may|     262|       1|   -1|       0| unknown| no|
+|   34| 59|blue-collar|married|secondary|       no|      0|    yes|  no|unknown|  5|  may|     226|       1|   -1|       0| unknown| no|
+|   37| 25|blue-collar|married|secondary|       no|     -7|    yes|  no|unknown|  5|  may|     365|       1|   -1|       0| unknown| no|
++-----+---+-----------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+
+>>>df.filter((df.marital == "married") & (df.job == "blue-collar")).count()
+6968
+
+>>> df.groupBy([df.age]).count().show()
++---+-----+
+|age|count|
++---+-----+
+| 31| 1996|
+| 85|    5|
+| 65|   59|
+| 53|  891|
+| 78|   30|
++---+-----+
+
+>>> df.groupBy([df.age,df.marital]).count().show(5)
++---+-------+-----+
+|age|marital|count|
++---+-------+-----+
+| 42| single|  218|
+| 55| single|   54|
+| 66|married|   53|
+| 68| single|    4|
+| 28|married|  325|
++---+-------+-----+
+
+>>> df.groupBy([df.age,df.marital,df.y]).count().show(5)
++---+--------+---+-----+
+|age| marital|  y|count|
++---+--------+---+-----+
+| 30| married|yes|   59|
+| 77| married| no|   19|
+| 43|divorced| no|  158|
+| 39|divorced|yes|   16|
+| 74| married| no|   21|
++---+--------+---+-----+
+only showing top 5 rows
+
+
+>>> df2 = df.filter((df.marital == "married") & (df.age < 35))
+>>> df2.write.format("csv").save("/Newbankdata")
+>>> df2.write.format("json").save("/Newbankdata1") 
+
+RDD:
+
+>>>x = sc.textFile("/Bank_full.csv")
+>>> y = x.map(lambda n: n.upper())
+>>> for i in y.take(2):
+...     print(i)
+
+Scenario 4:
+Working with a collection using PySpark
+
+>>> x = ["welcome","hello","hell","well","cool","cold"]
+
+>>> y = sc.parallelize(x)
+
+>>> z = y.flatMap(lambda n : n.split(","))
+
+>>> for i in z.take(2):
+...     print(i)
+... 
+welcome
+hello
+
+>>> res = z.map(lambda n : (n[0],n))
+
+>>> for i in res.take(2):
+...     print(i)
+... 
+('w', 'welcome')
+('h', 'hello')
+
+>>> res.groupByKey().first()
+('h', <pyspark.resultiterable.ResultIterable object at 0x7f730f8863c8>)
+
+>>> res.groupByKey().mapValues(list).first()
+('h', ['hello', 'hell'])
+
+>>> res.toDebugString()
+b'(2) PythonRDD[48] at RDD at PythonRDD.scala:53 []\n |  ParallelCollectionRDD[35] at parallelize at PythonRDD.scala:195 []'
+
+Scneario 5:
+>>> x = spark.sql("select * from bankdata")
+21/07/09 05:30:33 WARN metastore.ObjectStore: Failed to get database global_temp, returning NoSuchObjectException
+>>> x.show(2)
++-----+----+----------+-------+---------+---------+-------+-------+----+-------+----+-----+--------+--------+-----+--------+--------+---+
+|serno| age|       job|marital|education|defaulter|balance|housing|load|contact| day|month|duration|campaign|pdays|previous|poutcome|  y|
++-----+----+----------+-------+---------+---------+-------+-------+----+-------+----+-----+--------+--------+-----+--------+--------+---+
+| null|null|       job|marital|education|defaulter|   null|housing|loan|contact|null|month|    null|    null| null|    null|poutcome|  y|
+|    1|  58|management|married| tertiary|       no|   2143|    yes|  no|unknown|   5|  may|     261|       1|   -1|       0| unknown| no|
++-----+----+----------+-------+---------+---------+-------+-------+----+-------+----+-----+--------+--------+-----+--------+--------+---+
+only showing top 2 rows
+
+>>> x.filter(x.month == "may").show(5)
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|serno|age|         job|marital|education|defaulter|balance|housing|load|contact|day|month|duration|campaign|pdays|previous|poutcome|  y|
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|    1| 58|  management|married| tertiary|       no|   2143|    yes|  no|unknown|  5|  may|     261|       1|   -1|       0| unknown| no|
+|    2| 44|  technician| single|secondary|       no|     29|    yes|  no|unknown|  5|  may|     151|       1|   -1|       0| unknown| no|
+|    3| 33|entrepreneur|married|secondary|       no|      2|    yes| yes|unknown|  5|  may|      76|       1|   -1|       0| unknown| no|
+|    4| 47| blue-collar|married|  unknown|       no|   1506|    yes|  no|unknown|  5|  may|      92|       1|   -1|       0| unknown| no|
+|    5| 33|     unknown| single|  unknown|       no|      1|     no|  no|unknown|  5|  may|     198|       1|   -1|       0| unknown| no|
++-----+---+------------+-------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+only showing top 5 rows
+
+>>> x.filter(x.month == "may").write.saveAsTable("newtblbank")
+
+>>> spark.sql("show tables").show()
++--------+-----------+-----------+
+|database|  tableName|isTemporary|
++--------+-----------+-----------+
+| default|   bankdata|      false|
+| default| newtblbank|      false|
+| default|salarydata1|      false|
++--------+-----------+-----------+
+
+>>> spark.sql("select * from newtblbank limit 10").show()
++-----+---+------------+--------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|serno|age|         job| marital|education|defaulter|balance|housing|load|contact|day|month|duration|campaign|pdays|previous|poutcome|  y|
++-----+---+------------+--------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+|    1| 58|  management| married| tertiary|       no|   2143|    yes|  no|unknown|  5|  may|     261|       1|   -1|       0| unknown| no|
+|    2| 44|  technician|  single|secondary|       no|     29|    yes|  no|unknown|  5|  may|     151|       1|   -1|       0| unknown| no|
+|    3| 33|entrepreneur| married|secondary|       no|      2|    yes| yes|unknown|  5|  may|      76|       1|   -1|       0| unknown| no|
+|    4| 47| blue-collar| married|  unknown|       no|   1506|    yes|  no|unknown|  5|  may|      92|       1|   -1|       0| unknown| no|
+|    5| 33|     unknown|  single|  unknown|       no|      1|     no|  no|unknown|  5|  may|     198|       1|   -1|       0| unknown| no|
+|    6| 35|  management| married| tertiary|       no|    231|    yes|  no|unknown|  5|  may|     139|       1|   -1|       0| unknown| no|
+|    7| 28|  management|  single| tertiary|       no|    447|    yes| yes|unknown|  5|  may|     217|       1|   -1|       0| unknown| no|
+|    8| 42|entrepreneur|divorced| tertiary|      yes|      2|    yes|  no|unknown|  5|  may|     380|       1|   -1|       0| unknown| no|
+|    9| 58|     retired| married|  primary|       no|    121|    yes|  no|unknown|  5|  may|      50|       1|   -1|       0| unknown| no|
+|   10| 43|  technician|  single|secondary|       no|    593|    yes|  no|unknown|  5|  may|      55|       1|   -1|       0| unknown| no|
++-----+---+------------+--------+---------+---------+-------+-------+----+-------+---+-----+--------+--------+-----+--------+--------+---+
+
+hdu@m1:~$ hdfs dfs -ls /user/hive/warehouse/newtblbank
+Found 4 items
+-rw-r--r--   2 hdu supergroup          0 2021-07-09 05:33 /user/hive/warehouse/newtblbank/_SUCCESS
+-rw-r--r--   2 hdu supergroup     170384 2021-07-09 05:33 /user/hive/warehouse/newtblbank/part-00000-656d6922-9bd2-4742-94d9-08bc082d131c-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup     170384 2021-07-09 05:33 /user/hive/warehouse/newtblbank/part-00001-656d6922-9bd2-4742-94d9-08bc082d131c-c000.snappy.parquet
+-rw-r--r--   2 hdu supergroup     170384 2021-07-09 05:33 /user/hive/warehouse/newtblbank/part-00002-656d6922-9bd2-4742-94d9-08bc082d131c-c000.snappy.parquet
+
+
