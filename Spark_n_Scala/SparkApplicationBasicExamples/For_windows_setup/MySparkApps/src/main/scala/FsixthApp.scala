@@ -17,8 +17,8 @@ val x = sc.textFile(fileInfoFile_with_Marked_Data)
 val sample1 = x
 val newDS = sample1.zipWithIndex().map{case(line,i)=>i.toString + "," + line}
 val pairx = newDS.map(x => (x.split(",")(0),x))
-val fileInfoFile_without_Marked_Data = args(1)
 
+val fileInfoFile_without_Marked_Data = args(1)
 val y = sc.textFile(fileInfoFile_without_Marked_Data)
 val sample2 = y
 val newDS2 = sample2.zipWithIndex().map{case(line,i)=>i.toString + "," + line}

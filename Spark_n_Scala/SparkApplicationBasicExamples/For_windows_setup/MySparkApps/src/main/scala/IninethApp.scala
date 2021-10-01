@@ -6,7 +6,7 @@ import org.apache.spark.SparkConf
 
 object IninethApp extends App{
 val conf = new SparkConf().setAppName("HeySparkStreaming")
-//.setMaster("local[2]")
+.setMaster("local[2]")
 val sc = new SparkContext(conf)
 val ssc = new StreamingContext(sc , Seconds(10))
 //setting up receiver

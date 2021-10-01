@@ -1,6 +1,12 @@
 Install eclipse
 Make sure you have scala plugin installed in eclipse
-Make sure scala compiler is set to scala-2.11  (project > build path > configure build path > scala compiler)
+(say : http://download.scala-ide.org/sdk/lithium/e47/scala212/stable/site)
+
+or download scale IDE - eclipse
+http://scala-ide.org/download/sdk.html
+
+Make sure scala compiler is set to scala-2.11  (or scala-2.12 as per your IDE)
+(project > build path > configure build path > scala compiler)
 
 Download spark related jars from the link to a folder on your machine.
 <Link>
