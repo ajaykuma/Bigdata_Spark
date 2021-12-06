@@ -1,2 +1,0 @@
-Download nmap for using ncat on windows
-C:\Users\Win10\Downloads\nmap-7.92>ncat.exe -l -p 9999

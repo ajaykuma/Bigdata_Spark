@@ -1,3 +1,0 @@
-#If Hadoop already setup on set of machines, then
-this folder 'Spark-2.4.3' and its contents can be used to setup
-spark integrated with hadoop
