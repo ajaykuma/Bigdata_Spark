@@ -3,10 +3,10 @@ analysis_job.py
 ~~~~~~~~~~
 
     $SPARK_HOME/bin/spark-submit \
-    --master spark://localhost:7077 \
-    --py-files packages.zip \
-    --files configs/config.json \
-    jobs/analysis_job.py
+    --master spark://localhost:7077 \ (OR --master yarn OR --master local)
+    --py-files <path of packages>/packages.zip \
+    --files <path of configs>/configs/config.json \
+    <path of jobs>/jobs/analysis_job.py
 
 """
 
@@ -29,13 +29,14 @@ def main():
     """
     # start Spark application and get Spark session, logger and config
     spark, log, config = start_spark(
-        app_name='my_analysis_job')
+        app_name='my_analysis_job',
+        files=['configs/config.json'])
 
     # log that main analysis job is starting
     log.warn('analysis_job is up-and-running')
 
     # Analysis pipeline
-    data = extract_data(spark)
+    data = extract_data(spark,config['file_location'])
     data_transformed = transform_data(data)
     load_data(data_transformed)
 
@@ -45,12 +46,11 @@ def main():
     return None
 
 
-def extract_data(spark):
+def extract_data(spark,file_location):
     """Load data in json format from local storage /s3
     :param spark: Spark session object.
     :return: Spark DataFrame.
     """
-    file_location = "C:\\Users\\Win10\\Desktop\\SampleProject\\data\\recipes.json"
     df = spark.read.format("json").load(file_location)
     return df
 
@@ -119,8 +119,8 @@ def load_data(df):
         .write.format("csv") \
         .option("header","true") \
         .mode("overwrite") \
-        .save("C:\\Users\\Win10\\Desktop\\SampleProject\\data\\Finalreport")
-    df.toPandas().to_csv("C:\\Users\\Win10\\Desktop\\SampleProject\\data\\report.csv")
+        .save("data\\output\\Finalreport")
+    df.toPandas().to_csv("data\\output\\report.csv")
     return None
 
 # entry point for PySpark ETL application
