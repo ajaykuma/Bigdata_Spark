@@ -1,3 +1,6 @@
+#setup spark locally to work with its components
+#NO HADOOP SETUP NEEDED
+
 Download pre-built spark from spark.apache.org or Download spark from archive.apache.org
 --------------------------
 --edit env variables
@@ -6,22 +9,23 @@ SPARK_HOME=C:\spark-2.4.3-bin-hadoop2.6
 
 #JAVA_HOME=C:\Java\jdk1.8.0_221
 
-#(if hadoop not downloaded and setup, then create a folder "hadoop/bin" which contains Winutils.exe
-HADOOP_HOME=<pathofhadoopdirectory>
+#(if hadoop not downloaded and setup, then create a folder "hadoop/bin" which contains winutils.exe
+
 #Look into: https://github.com/cdarlint/winutils
 --Download 'hadoop.dll' & 'winutils.exe' as per your downloaded version of spark
 --copy these into <pathofhadoopdirectory/bin>
 
-#(if hadoop downloaded and setup, then )
-#Look into: https://github.com/cdarlint/winutils
---Download 'hadoop.dll' & 'winutils.exe' as per your downloaded version of hadoop n spark and place these in
---C:\Hadoop\hadoop-2.6.5\bin
-HADOOP_HOME=<pathofhadoop>
+--edit env variables
+#Hadoop home points to 
+HADOOP_HOME=C:\Hadoop
 
-Running Spark-shell
+#(if hadoop downloaded and setup, then refer : SetupSparkonWindows-2.txt file.
+
+Running Spark-shell or if any error try starting command prompt as administrator..
+
 C:\spark-2.4.3-bin-hadoop2.6>.\bin\spark-shell2
 
-scala> val x = sc.textFile("cv000_29416.txt")
+scala> val x = sc.textFile("file:///C:\\Users\\Win10\\Desktop\\cv000_29416.txt")
 x: org.apache.spark.rdd.RDD[String] = cv000_29416.txt MapPartitionsRDD[1] at textFile at <console>:24
 
 scala> val y = x.map(_.toUpperCase())
@@ -34,3 +38,6 @@ scala> y.count
 scala> y.collect
 
 -----------------
+Similarly running pyspark2
+>>> x = sc.textFile("file:///C:\\Users\\Win10\\Desktop\\cv000_29416.txt")
+>>> x.collect()

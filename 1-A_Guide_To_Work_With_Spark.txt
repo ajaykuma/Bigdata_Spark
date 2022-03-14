@@ -10,12 +10,12 @@ Here are some ways in which you can work with Spark n Scala:
   Download "sbt" from https://www.scala-sbt.org/download.html
 
 --Setup Spark Standalone cluster (single node cluster) on windows
-  Instructions to be added soon
   (This will allow to use spark single node cluster on windows, n all its components such as
    spark-shell/pyspark/spark-sql/sparkR/spark-submit n write scala apps using REPL ie spark-shell)
+  Link:
 
 --Setup Spark standalone multinode cluster (multinode cluster on linux)
-  https://github.com/ajaykuma/Hadoop-and-Scala-Setup/tree/master/SparkStandAlone_Setup
+  Link : 
 
 --Setup Spark cluster integrated with Hadoop's YARN
   Hadoop Setup: https://github.com/ajaykuma/Hadoop-and-Scala-Setup/tree/master/hadoopconf2.6.5

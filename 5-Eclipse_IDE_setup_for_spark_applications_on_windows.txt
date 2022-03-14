@@ -23,7 +23,6 @@ SPARK_LOCAL_IP
 127.0.0.1
 
 #(If hadoop not downloaded and setup, then create a folder "hadoop" and "bin" within "hadoop" 
-
 HADOOP_HOME=C:\hadoop\
 
 #Look into: https://github.com/cdarlint/winutils

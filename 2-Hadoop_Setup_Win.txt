@@ -142,11 +142,14 @@ by the startup scripts and the daemons.
 Format the FileSystem
 C:\Hadoop\hadoop-2.6.5>\bin\hdfs namenode -format
 
-This command will print a number of filesystem parameters. Just look for the following two strings to ensure that the format command succeeded.
+This command will print a number of filesystem parameters. 
+Just look for the following two strings to ensure that the format command succeeded.
 14/01/18 08:36:23 INFO namenode.FSImage: Saving image file \tmp\hadoop-username\dfs\name\current\fsimage.ckpt_0000000000000000000 using no compression
 14/01/18 08:36:23 INFO namenode.FSImage: Image file \tmp\hadoop-username\dfs\name\current\fsimage.ckpt_0000000000000000000 of size 200 bytes saved in 0 seconds.
 
-#if hadoop-env.cmd did not set the environment variables
+---optional---
+#if command dint work or threw error then..
+#if hadoop-env.cmd did not set the environment variables, then manually set the paths 
 
 C:\Hadoop\hadoop-2.6.5>set HADOOP_PREFIX=C:\Hadoop\hadoop-2.6.5
 
@@ -155,6 +158,11 @@ C:\Hadoop\hadoop-2.6.5>set HADOOP_CONF_DIR=%HADOOP_PREFIX%\etc\hadoop
 C:\Hadoop\hadoop-2.6.5>set YARN_CONF_DIR=%HADOOP_CONF_DIR%
 
 C:\Hadoop\hadoop-2.6.5>set PATH=%PATH%;%HADOOP_PREFIX%\bin
+
+and if formatting was not done, 
+  do it as shown above (hdfs namenode -format)
+
+---optional ends---
 
 C:\Hadoop\hadoop-2.6.5>cd sbin
 

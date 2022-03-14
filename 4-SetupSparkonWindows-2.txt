@@ -1,0 +1,89 @@
+Download pre-built spark from spark.apache.org or Download spark from archive.apache.org
+--------------------------
+--edit env variables
+#Spark home points to 
+SPARK_HOME=C:\spark-2.4.3-bin-hadoop2.6
+
+--check if java path is correctly set..
+#JAVA_HOME=C:\Java\jdk1.8.0_221
+
+#(if hadoop downloaded and setup, then )
+#Look into: https://github.com/cdarlint/winutils
+--Download 'hadoop.dll' & 'winutils.exe' as per your downloaded version of hadoop n spark and place these in
+--C:\Hadoop\hadoop-2.6.5\bin
+
+--edit env variables
+#Hadoop home points to 
+HADOOP_HOME=C:\Hadoop\hadoop-2.6.5
+
+--Now edit spark related config files to point to Hadoop
+
+spark-defaults.conf in C:\spark-2.4.3-bin-hadoop2.6\conf should have these... (apart from defaults which might be commented)
+
+spark.master                         yarn
+spark.eventLog.enabled               true
+spark.eventLog.dir                   hdfs://0.0.0.0:19000/spark2/ApplicationHistory
+spark.serializer                    org.apache.spark.serializer.KryoSerializer
+spark.driver.memory                 5g
+
+Note** Make sure the spark2/ApplicationHistory directory structure exists on HDFS
+[commands to create are
+  hdfs dfs -mkdir /spark2
+  hdfs dfs -mkdir /spark2/ApplicationHistory
+]
+
+spark-env.sh or in spark-env.cmd should have these...
+export HADOOP_HOME=C:\Hadoop\hadoop-2.6.5
+export HADOOP_COMMON_HOME=C:\Hadoop\hadoop-2.6.5
+export HADOOP_CONF_DIR=C:\Hadoop\hadoop-2.6.5\etc\hadoop
+export YARN_CONF_DIR=C:\spark-2.4.3-bin-hadoop2.6\conf\yarn-conf
+
+
+#start hadoop cluster if not already running
+C:\>cd Hadoop
+
+C:\Hadoop>cd hadoop-2.6.5
+
+C:\Hadoop\hadoop-2.6.5>cd sbin
+
+C:\Hadoop\hadoop-2.6.5\sbin>start-dfs.cmd
+
+C:\Hadoop\hadoop-2.6.5\sbin>start-yarn.cmd
+starting yarn daemons
+
+C:\Hadoop\hadoop-2.6.5\sbin>jps
+13104 DataNode
+8468 NodeManager
+4968 Jps
+2156 ResourceManager
+876 NameNode
+
+#Running Spark-shell
+
+C:\spark-2.4.3-bin-hadoop2.6\bin>spark-shell2
+Exception in thread "main" org.apache.spark.SparkException: When running with master 'yarn' either HADOOP_CONF_DIR or YARN_CONF_DIR must be set in the environment.
+
+OR
+C:\spark-2.4.3-bin-hadoop2.6\bin>pyspark2
+Python 3.7.6 (tags/v3.7.6:43364a7ae0, Dec 19 2019, 00:42:30) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+Exception in thread "main" org.apache.spark.SparkException: When running with master 'yarn' either HADOOP_CONF_DIR or YARN_CONF_DIR must be set in the environment.
+
+If seeing these errors:
+--set paths..
+C:\spark-2.4.3-bin-hadoop2.6\bin>set HADOOP_PREFIX=C:\Hadoop\hadoop-2.6.5
+
+C:\spark-2.4.3-bin-hadoop2.6\bin>set HADOOP_CONF_DIR=%HADOOP_PREFIX%\etc\hadoop
+
+C:\spark-2.4.3-bin-hadoop2.6\bin>set YARN_CONF_DIR=%HADOOP_CONF_DIR%
+
+C:\spark-2.4.3-bin-hadoop2.6\bin>set PATH=%PATH%;%HADOOP_PREFIX%\bin
+
+
+C:\spark-2.4.3-bin-hadoop2.6\bin\pyspark2
+ or
+C:\spark-2.4.3-bin-hadoop2.6>.\bin\spark-shell2
+
+Try accessing spark UI:
+http://localhost:4040  ---- when pyspark2 or spark-shell2 is started..
+
