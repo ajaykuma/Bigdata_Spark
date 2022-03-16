@@ -9,8 +9,8 @@ object CthirdApp extends App{
 
 //val conf = new SparkConf().setAppName("HelloSpark").setMaster("local")
 //val sc = new SparkContext(conf)
-val spark = SparkSession.builder.master("local").appName("Spark_SQL_basic_example").getOrCreate()
-//val spark = SparkSession.builder.appName("Spark_SQL_basic_example").getOrCreate()
-val x = spark.read.json("employees.json")
+//val spark = SparkSession.builder.master("local").appName("Spark_SQL_basic_example").getOrCreate()
+val spark = SparkSession.builder.appName("Spark_SQL_basic_example").getOrCreate()
+val x = spark.read.json("/mydata/people.json")
 x.show()
 }

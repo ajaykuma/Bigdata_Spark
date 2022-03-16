@@ -9,8 +9,8 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.Row
 
 object FsixthApp extends App {
-val conf = new SparkConf().setAppName("HelloSpark").setMaster("local").set("spark.debug.maxToStringFields","100")
-//val conf = new SparkConf().setAppName("HelloSpark").set("spark.debug.maxToStringFields","100")
+//val conf = new SparkConf().setAppName("HelloSpark").setMaster("local").set("spark.debug.maxToStringFields","100")
+val conf = new SparkConf().setAppName("HelloSpark").set("spark.debug.maxToStringFields","100")
 val sc = new SparkContext(conf)
 val fileInfoFile_with_Marked_Data = args(0)
 val x = sc.textFile(fileInfoFile_with_Marked_Data)

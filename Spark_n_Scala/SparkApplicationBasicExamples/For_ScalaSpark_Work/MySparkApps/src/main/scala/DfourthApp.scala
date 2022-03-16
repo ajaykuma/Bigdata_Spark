@@ -11,11 +11,11 @@ import org.apache.spark.SparkConf
 //import scala.io.Source
 
 object DfourthApp extends App{
-  val conf = new SparkConf().setAppName("DataSpark").setMaster("local")
-  //val conf = new SparkConf().setAppName("DataSpark")
+  //val conf = new SparkConf().setAppName("DataSpark").setMaster("local")
+  val conf = new SparkConf().setAppName("DataSpark")
   val sc = new SparkContext(conf)
-  val fileInfoFile_with_Marked_Data = "DataFile.txt"
-  //val fileInfoFile_with_Marked_Data = args(0)
+  //val fileInfoFile_with_Marked_Data = "DataFile.txt"
+  val fileInfoFile_with_Marked_Data = args(0)
   val x = sc.textFile(fileInfoFile_with_Marked_Data)
   //val sample1 = x
   val newDS = x.zipWithIndex().map{case(line,i)=>i.toString + "," + line}
