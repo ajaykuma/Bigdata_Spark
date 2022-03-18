@@ -88,6 +88,7 @@ def findingbeef(x:str):
     else:
         return 'not beef'
 
+
 def timeff(x):
     """to convert duration into timedelta and then to minutes for easy computation
     :param x: cookTime/prepTime recipes.

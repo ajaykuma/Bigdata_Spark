@@ -63,6 +63,7 @@ x = sc.textFile("mydata/mydata-local1/abc1.txt")
 >>>grouped.collect()
 
 >>> count = y.groupByKey().count()
+
 ex4:
 option1:
 >>> x = sc.textFile("mydata/mydata-local1/abc1.txt")
@@ -113,9 +114,6 @@ option3:
 >>> reduced = pairrdd.reduceByKey(lambda a,b: a+b)
 >>> for i in reduced.take(10):
 ...     print(i)
-
--------------------------------
-
 
 --------------------
 

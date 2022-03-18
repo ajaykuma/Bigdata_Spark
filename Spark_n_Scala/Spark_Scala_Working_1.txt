@@ -359,58 +359,13 @@ df1: org.apache.spark.sql.DataFrame = [_c0: string, _c1: string ... 16 more fiel
 
 --schema is not inferred and headers are unknown
 scala> df1.printSchema()
-root
- |-- _c0: string (nullable = true)
- |-- _c1: string (nullable = true)
- |-- _c2: string (nullable = true)
- |-- _c3: string (nullable = true)
- |-- _c4: string (nullable = true)
- |-- _c5: string (nullable = true)
- |-- _c6: string (nullable = true)
- |-- _c7: string (nullable = true)
- |-- _c8: string (nullable = true)
- |-- _c9: string (nullable = true)
- |-- _c10: string (nullable = true)
- |-- _c11: string (nullable = true)
- |-- _c12: string (nullable = true)
- |-- _c13: string (nullable = true)
- |-- _c14: string (nullable = true)
- |-- _c15: string (nullable = true)
- |-- _c16: string (nullable = true)
- |-- _c17: string (nullable = true)
 
 scala> df1.show(5)
-+-----+---+------------+-------+---------+---------+-------+-------+----+-------+----+-----+--------+--------+-----+--------+--------+--
---+
-|  _c0|_c1|         _c2|    _c3|      _c4|      _c5|    _c6|    _c7| _c8|    _c9|_c10| _c11|    _c12|    _c13| _c14|    _c15|    _c16|_c17|
-+-----+---+------------+-------+---------+---------+-------+-------+----+-------+----+-----+--------+--------+-----+--------+--------+--
---+
-|serNo|age|         job|marital|education|defaulter|balance|housing|loan|contact| day|month|duration|campaign|pdays|previous|poutcome| y|
-|    1| 58|  management|married| tertiary|       no|   2143|    yes|  no|unknown|   5|  may|     261|       1|   -1|       0| unknown| no|
 
 scala> df1.select($"serNo",$"age").show(5)
-+-----+---+
-|serNo|age|
-+-----+---+
-|    1| 58|
-|    2| 44|
-|    3| 33|
-|    4| 47|
-|    5| 33|
-+-----+---+
 only showing top 5 rows
 
 scala> df1.select($"serNo",$"age").filter($"age" > 75).show(5)
-+-----+---+
-|serNo|age|
-+-----+---+
-|29159| 83|
-|29323| 83|
-|30909| 76|
-|31052| 83|
-|31056| 85|
-+-----+---+
-only showing top 5 rows
 
 --writing df to storage
 scala> df1.write.format("csv").save("/dfwrites/bankdata")
@@ -419,19 +374,41 @@ scala> df1.write.format("csv").save("/dfwrites/bankdata_csv")
 scala> df1.write.saveAsTable("bankdata_tbl")
 ivysettings.xml file not found in HIVE_HOME or HIVE_CONF_DIR,/etc/hive/conf.dist/ivysettings.xml will be used
 
+for a scala based analysis on same file ..refer >>>> BigData_Spark\Bigdata_Spark\Spark_n_Scala\Spark_Marketing_Analysis_S
+
 --working with JSON
 scala> val recp = spark.read.json("/mydata/recipes.json")
 recp: org.apache.spark.sql.DataFrame = [cookTime: string, datePublished: string ... 7 more fields]
 scala> recp.printSchema()
-root
- |-- cookTime: string (nullable = true)
- |-- datePublished: string (nullable = true)
- |-- description: string (nullable = true)
- |-- image: string (nullable = true)
- |-- ingredients: string (nullable = true)
- |-- name: string (nullable = true)
- |-- prepTime: string (nullable = true)
- |-- recipeYield: string (nullable = true)
- |-- url: string (nullable = true)
 
+for a pyspark based project on same file..refer >>>>>> BigData_Spark\Bigdata_Spark\Pyspark\Project1
+
+Example of creating and applying function:
+
+in Scala:
+scala> def testfunc(x: String): String = {
+     | if(x == "beef"){
+     | return x}
+     | else if(x == "Beef"){
+     | return x}
+     | else {
+     | return "not beef"}}
+testfunc: (x: String)String
+
+#creating UDF
+import org.apache.spark.sql.functions.udf
+scala> def testfunc2 = udf((ingr: String) => {
+     | ingr match {
+     | case t if ingr == "beef" => "beef"
+     | case t if ingr == "Beef" => "beef"
+     | case _ => "no beef"
+     | }})
+testfunc2: org.apache.spark.sql.expressions.UserDefinedFunction
+
+Applying function to a column and adding new column
+val test = df.withColumn("test",testfunc2(df("ingredients")))
+
+"""
 continued...
+
+

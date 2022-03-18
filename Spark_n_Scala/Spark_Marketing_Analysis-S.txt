@@ -1,0 +1,187 @@
+1.	load data and create spark data frame 
+Run spark shell as 
+
+spark-shell --packages com.databricks:spark-csv_2.10:1.4.0
+spark-shell --packages com.databricks:spark-xml_2.10:0.4.1
+
+load the file as dataframe using the spark-csv package 
+val df = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("inferSchema","true").option("delimiter",";").load("file:///data/bank/bank-full.csv")
+
+output: 
+df: org.apache.spark.sql.DataFrame = [age: int, job: string, marital: string, education: string, default: string, balance: int, housing: string, loan: string, contact: string, day: int, month: string, duration: int, campaign: int, pdays: int, previous: int, poutcome: string, y: string]
+
+
+2.	Give marketing success rate. (No. of people subscribed / total no. of entries)
+Get the total count of records 
+val totalcount = df.count().toDouble
+output:	
+totalcount: Double = 45211.0
+
+Get the total subscribed clients 
+val subscription_count= df.filter($"y" === "yes").count().toDouble
+output: 
+subscription_count: Double = 5289.0
+
+now find the success rate 
+val success_rate = subscription_count/total_count
+output: 
+success_rate: Double = 0.11698480458295547
+
+SL no column is not required to find the success rate. You can use count inbuilt function to function.
+Using Count find the number find number of people subscribed, divide by total number people using count.
+
+
+
+3.	Check max, min, Mean and median age of average targeted customer
+
+
+
+df.select(max($"age"), avg($"age"), min($"age")).show 
+output:
++--------+-----------------+--------+
+|max(age)|         avg(age)|min(age)|
++--------+-----------------+--------+
+|      95|40.93621021432837|      18|
++--------+-----------------+--------+
+
+
+4.	Check quality of clients by checking average balance, median balance of clients 
+
+Register the temp table with the name bankdetails 
+df.registerTempTable(“bankdetails”)
+
+now query for the average and median balance from the table 
+sqlContext.sql("select percentile(balance,0.5) as median ,avg(balance) as average from bankdetails").show
+
+output:
+--------------+
+|median|           average|
++------+------------------+
+| 448.0|1362.2720576850766|
++------+------------------+
+
+
+
+5.	Check if age matters in marketing subscription for deposit
+Get the average age based on subscriptions as 
+df.groupBy("y").agg(avg($"age")).show
+
+output:
++---+------------------+
+|  y|          avg(age)|
++---+------------------+
+| no| 40.83898602274435|
+|yes|41.670069956513515|
++---+------------------+
+
+Yes, It is .
+
+6.	Check if marital status mattered for subscription to deposit. 
+Get the count based on the subscription on the marital status 
+
+df.groupBy("y").agg(count($"marital")).show
+
+output:
++---+--------------+
+|  y|count(marital)|
++---+--------------+
+| no|         39922|
+|yes|          5289|
+	+---+--------------+
+
+It looks marital status affects the subscription. Married are least subscribed.
+
+
+ 
+
+7.	Check if age and marital status together mattered for subscription to deposit scheme
+	Do the grouping based on age and the marital status 
+df.groupBy("marital","y").count().sort($"count".desc).show
+
++--------+---+-----+
+| marital|  y|count|
++--------+---+-----+
+| married| no|24459|
+|  single| no|10878|
+|divorced| no| 4585|
+| married|yes| 2755|
+|  single|yes| 1912|
+|divorced|yes|  622|
+	+--------+---+-----+
+
+
+8.	Do Feature engineering for age column and find right age effect on campaign
+df.groupBy("age","y").count().sort($"count".desc).show
++---+---+-----+
+|age|  y|count|
++---+---+-----+
+| 32| no| 1864|
+| 31| no| 1790|
+| 33| no| 1762|
+| 34| no| 1732|
+| 35| no| 1685|
+| 36| no| 1611|
+| 30| no| 1540|
+| 37| no| 1526|
+| 39| no| 1344|
+| 38| no| 1322|
+| 40| no| 1239|
+| 41| no| 1171|
+| 42| no| 1131|
+| 45| no| 1110|
+| 43| no| 1058|
+| 46| no| 1057|
+| 44| no| 1043|
+| 29| no| 1014|
+| 47| no|  975|
+| 48| no|  915|
++---+---+-----+
+only showing top 20 rows
+
+df.groupBy("age","y").count().sort($"count".desc).count
+res45: Long = 148
+
+age is between 18 and 95 and with possible subscriptions of yes and no, you will get 78*2 records. Better to divide age category as three with 18-30 as young and 31 to 65 as mid and > 65 as old 
+
+create an udf for the conversion
+
+import org.apache.spark.sql.functions.udf
+
+def ageToCategory = udf((age:Int) => {
+      age match {
+      case t if t < 30 => "young"
+      case t if t > 65 => "old"
+      case _ => "mid"
+      }
+      }
+     )
+
+ageToCategory: org.apache.spark.sql.UserDefinedFunction
+
+Add a new column converting the age to category
+
+val newdf = df.withColumn(“agecategory”,ageToCategory(df(”age”)))
+
+newdf: org.apache.spark.sql.DataFrame = [age: int, job: string, marital: string, education: string, default: string, balance: int, housing: string, loan: string, contact: string, day: int, month: string, duration: int, campaign: int, pdays: int, previous: int, poutcome: string, y: string, agecategory: string]
+
+query based on agecategory and subscription, possible records are 3*2, which are easier for analysis
+
+newdf.groupBy("agecategory","y").count().sort($"count".desc).show
+
++-----------+---+-----+
+|agecategory|  y|count|
++-----------+---+-----+
+|        mid| no|38889|
+|        mid|yes| 4762|
+|      young| no|  602|
+|        old| no|  431|
+|        old|yes|  320|
+|      young|yes|  207|
++-----------+---+-----+
+
+
+Conclusion: Looks like middle aged clients are much interested.
+
+Data Ref: http://mlr.cs.umass.edu/ml/datasets/Bank+Marketing 
+
+

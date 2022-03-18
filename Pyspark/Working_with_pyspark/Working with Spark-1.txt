@@ -122,7 +122,13 @@ using rdd
 >>> c.collect()
 
 or
->>> sc.textFile("mydata/mydata-local1/Bank_full.csv",3).map(lambda n: n.upper()).map(lambda n: n.lower()).map(lambda n: n.upper()).map(lambda n: (n,1)).map(lambda n: (n,100)).first()
+>>> sc.textFile("mydata/mydata-local1/Bank_full.csv",3)
+.map(lambda n: n.upper())
+.map(lambda n: n.lower())
+.map(lambda n: n.upper())
+.map(lambda n: (n,1))
+.map(lambda n: (n,100))
+.first()
 ((u'SERNO,AGE,JOB,MARITAL,EDUCATION,DEFAULTER,BALANCE,HOUSING,LOAN,CONTACT,DAY,MONTH,DURATION,CAMPAIGN,PDAYS,PREVIOUS,POUTCOME,Y', 1), 100)  
 
 or

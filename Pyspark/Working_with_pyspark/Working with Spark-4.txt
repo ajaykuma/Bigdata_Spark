@@ -69,7 +69,7 @@ people.show()
 Option 1.2
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType,StringType,StructType,StructField
-spark = SparkSession.builder.appName("testdfapp").config("spark.sql.warehouse.dir","/user/itv000966/spark-warehouse").getOrCreate()
+spark = SparkSession.builder.appName("testdfapp").config("spark.sql.warehouse.dir","/user/itv/spark-warehouse").getOrCreate()
 
 myschema = StructType([StructField("id",IntegerType(),True),
                        StructField("name",StringType(),True),
