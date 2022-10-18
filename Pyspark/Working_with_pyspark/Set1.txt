@@ -1,0 +1,153 @@
+#Set 1
+Pyspark
+
+#RDD
+--RDD way
+--Reading a file from HDFS/local filesystem
+##
+x = sc.textFile("mydata/mydata-local1/abc1.txt")
+
+type(x)
+for i in x.take(5):
+... print(i)
+x.first()
+x.collect()
+--refer Spark UI
+
+--Dataframe way
+##
+y = spark.read.format("text").load("mydata/mydata-local1/abc1.txt")
+type(y)
+y.show(1)
+y.first()
+y.collect()
+
+--to see the number of partitions of RDD
+x.getNumPartitions()
+
+--to see lineage
+##
+x.toDebugString()
+print(x.toDebugString())
+
+##
+x = sc.textFile("mydata/mydata-local1/abc1.txt",4)
+print(x.toDebugString())
+(4) mydata/mydata-local1/abc1.txt MapPartitionsRDD[1] at textFile at NativeMethodAccessorImpl.java:0 []
+ |  mydata/mydata-local1/abc1.txt HadoopRDD[0] at textFile at NativeMethodAccessorImpl.java:0 []
+x.getNumPartitions()
+x.saveAsTextFile("mydata/rddo1")
+
+--try above option without partition option and then save 
+x = sc.textFile("mydata/mydata-local1/abc1.txt")
+x.getNumPartitions()
+x.saveAsTextFile("mydata/rddo2")
+
+
+--using a different file from HDFS/local filesystem
+##
+x = sc.textFile("mydata/mydata-local1/Bank_full.csv")
+type(x)
+
+for i in x.take(5):
+...     print(i)
+... 
+
+x.first()
+
+--changing/allocating number of partitions
+##
+x = sc.textFile("mydata/mydata-local1/Bank_full.csv",3)
+x.getNumPartitions()
+--refer Spark UI
+
+--No Spark
+##
+x = range(1,10)
+for i in x:
+...   print(i)
+
+or
+
+for i in x:
+...     print(i,end=" ")
+
+--Using spark to work on collections
+##
+y = sc.parallelize(x,2)
+or
+y = sc.parallelize(range(1,10))
+y.collect()
+y.first()
+y.count()
+y.getNumPartitions()
+
+##
+x = "welcome"
+y = sc.parallelize(x)
+y.first()
+
+
+--Using lambda for anonymous functions
+
+Ex1:
+x = "welcome"
+y = sc.parallelize(x)
+y.first()
+z = y.map(lambda n: n.upper())
+z.first()
+t = z.filter(lambda n: n == 'W')
+t.count()
+t = z.filter(lambda n: n == 'E')
+t.count()
+
+Ex2:
+x = sc.textFile("mydata/mydata-local1/cv000_29416.txt")
+y = x.map(lambda n: n.upper())
+y.getNumPartitions()
+y.first()
+
+z = y.map(lambda n: n.lower())
+z.getNumPartitions()
+z.first()
+
+a = z.map(lambda n: n.upper())
+a.getNumPartitions()
+a.first()
+
+b = a.map(lambda n: (n,1))
+b.getNumPartitions()
+b.first()
+
+c = b.map(lambda n: (n,100))
+
+c.getNumPartitions()
+c.first()
+c.collect()
+c.toDebugString()
+
+Ex3:
+--Using lambda and chaining transformations
+sc.textFile("mydata/mydata-local1/Bank_full.csv",3).map(lambda n: n.upper()).map(lambda n: n.lower()).map(lambda n: n.upper()).
+map(lambda n: (n,1)).map(lambda n: (n,100)).first()
+
+Ex4:
+--Using lambda and parallelize
+x = range(1,10)
+x
+y = sc.parallelize(x,2)
+y.getNumPartitions()
+z = y.filter(lambda n: n%2==0)
+a = z.map(lambda n: n*100)
+a.collect()
+
+
+Ex5:
+x = range(1,10)
+y = sc.parallelize(x)
+y
+z = y.map(lambda n : n*100)
+z
+z.collect()                                                                                                   
+
+===================================
