@@ -21,7 +21,7 @@ query = inputDF.writeStream.\
 print(type(query))
 
 import time
-time.sleep(20)
+time.sleep(200)
 query.stop()
 
 print(spark.read.load("DataLoaded/*.parquet").count())

@@ -195,27 +195,27 @@ write the df in different formats
 --task(sort the above group by result in descending order of count and find top 10 counts)
 
 >>>df.groupBy(['marital','age','y']).count()
->>>df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & (df.marital == 'married')).show()
+>>>df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).show()
 
 >>>from pyspark.sql.functions import avg,collect_list
 >>>df.select(collect_list("job")).show()
 >>>df.select(avg("balance"))
 
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & (df.marital == 'married')).\
+>>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).\
 ... write.option("header","true").\
 ... mode("overwrite").\
 ... csv("myfirstdf4")
 
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & (df.marital == 'married')).rdd.getNumPartitions()
+>>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).rdd.getNumPartitions()
 >>> df.rdd.getNumPartitions()
 
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & (df.marital == 'married')).\
+>>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).\
 ... write.option("header","true").\
 ... partitionBy("marital").\
 ... mode("overwrite").\
 ... csv("myfirstdf5")
 
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & (df.marital == 'married')).\
+>>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).\
 ... write.option("header","true").\
 ... partitionBy("age").\
 ... mode("overwrite").\
@@ -235,7 +235,7 @@ write the df in different formats
 
 >>> newdf.show(10)
 
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & (df.marital == 'married')).\
+>>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).\
 ... repartition(1).\
 ... write.option("header","true").\
 ... partitionBy("marital").\

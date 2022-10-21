@@ -23,6 +23,7 @@ inputDF = spark.readStream.schema(schema). \
 countDF = inputDF.groupby(inputDF.age).count()
 query = countDF.writeStream.format("console").queryName("counts").outputMode("complete").start()
 print(type(query))
+
 """import time
 time.sleep(100)
 query.stop()"""

@@ -11,3 +11,4 @@ wordcounts.pprint()
 
 ssc.start()
 ssc.awaitTermination()
+#C:\Users\Win10\Downloads\nmap-7.92>ncat.exe -lvp 2222

@@ -11,3 +11,4 @@ wordcounts.pprint()
 
 ssc.start()
 ssc.awaitTermination()
+#from terminal: ncat.exe -lvp 2222

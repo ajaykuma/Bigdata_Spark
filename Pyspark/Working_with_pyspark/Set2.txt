@@ -1,6 +1,6 @@
 #Set 2
 
-x = sc.textFile("mydata/mydata-local1/abc1.txt")
+x = sc.textFile("/sampledata/abc1.txt")
 y = x.flatMap(lambda n: n.split(" "))
 numTs = y.filter(lambda n: 't' in n)
 numWs = y.filter(lambda n: 'w' in n)
@@ -12,38 +12,38 @@ print("number of ts in file:" ,numTs.count(),"number of ws in file: " ,numWs.cou
 Application
 
 DAG /Job 0/ Stage 0
-x = sc.textFile("mydata/mydata-local1/abc1.txt",4)
+x = sc.textFile("/sampledata/abc1.txt",4)
 y = x.flatMap(lambda n: n.split(" "))
 z = y.map(lambda word: (word,1))
 z.first()
 
 DAG Job 1/Stage 1
-# x = sc.textFile("mydata/mydata-local1/abc1.txt",4)
+# x = sc.textFile("/sampledata/abc1.txt",4)
 # y = x.flatMap(lambda n: n.split(" "))
 # z = y.map(lambda word: (word,1))
 z.collect()
 
 DAG  Job 2/Stage 2
-# x = sc.textFile("mydata/mydata-local1/abc1.txt",4)
+# x = sc.textFile("/sampledata/abc1.txt",4)
 # y = x.flatMap(lambda n: n.split(" "))
 # z = y.map(lambda word: (word,1))
 z.saveAsTextFile("mydata/rddo2")
 
 DAG Job 3/Stage 3 ( involves shuffling)
-# x = sc.textFile("mydata/mydata-local1/abc1.txt",4)
+# x = sc.textFile("/sampledata/abc1.txt",4)
 # y = x.flatMap(lambda n: n.split(" "))
 # z = y.map(lambda word: (word,1))
 z.repartition(1).saveAsTextFile("mydata/rddo3")
 
 DAG Job 4/Stage 4 ( involves shuffling)
-# x = sc.textFile("mydata/mydata-local1/abc1.txt",4)
+# x = sc.textFile("/sampledata/abc1.txt",4)
 # y = x.flatMap(lambda n: n.split(" "))
 # z = y.map(lambda word: (word,1))
 wordcount = z.reduceByKey(lambda a,b: a+b)
 wordcount.saveAsTextFile("mydata/rddo4")
 
 DAG Job 5/Stage 5 ( involves shuffling)
-# x = sc.textFile("mydata/mydata-local1/abc1.txt",4)
+# x = sc.textFile("/sampledata/abc1.txt",4)
 # y = x.flatMap(lambda n: n.split(" "))
 # z = y.map(lambda word: (word,1))
 #wordcount = z.reduceByKey(lambda a,b: a+b)
@@ -52,16 +52,16 @@ wordcount.repartition(1).saveAsTextFile("mydata/rddo5")
 --Pair RDD: data > (K,V) Ex: This is my content---> This, This is my content
 
 --When working with directory
->>>mydata = sc.wholeTextFiles("mydata/mydata-local1")
+>>>mydata = sc.wholeTextFiles("/sampledata")
 >>> for i in mydata.keys().take(10):
 ...     print(i)
 
 --caching
-x = sc.textFile("mydata/mydata-local1/abc1.txt",4).flatMap(lambda n: n.split(" ")).map(lambda word: (word,1)).cache()
+x = sc.textFile("/sampledata/abc1.txt",4).flatMap(lambda n: n.split(" ")).map(lambda word: (word,1)).cache()
 x.collect()
 
 --persisting
-y = sc.textFile("mydata/mydata-local1/abc1.txt",4).flatMap(lambda n: n.split(" ")).map(lambda word: (word,1)).persist()
+y = sc.textFile("/sampledata/abc1.txt",4).flatMap(lambda n: n.split(" ")).map(lambda word: (word,1)).persist()
 y.collect()
 
 Resource mgr > application > applicationMaster
@@ -79,7 +79,7 @@ StorageLevel.DISK_ONLY
 StorageLevel.DISK_ONLY_2
 
 >>> from pyspark import StorageLevel
->>> x = sc.textFile("mydata/mydata-local1/abc1.txt",4)
+>>> x = sc.textFile("/sampledata/abc1.txt",4)
 >>> y = x.flatMap(lambda n: n.split(" "))
 >>> z = y.map(lambda word: (word,1))
 

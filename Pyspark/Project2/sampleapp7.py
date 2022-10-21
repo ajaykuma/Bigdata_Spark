@@ -45,10 +45,10 @@ inputDF2 = inputDF.filter(inputDF.age > 55).groupby("age").count().toDF("age","c
 """query = (inputDF1.writeStream.format("console").queryName("counts").outputMode("update").start())"""
 query = (inputDF2.writeStream.option("numRows",5).format("console").queryName("counts").outputMode("update").start())
 
-"""import time
-time.sleep(100)
-query.stop()"""
-query.awaitTermination()
+import time
+time.sleep(500)
+query.stop()
+"""query.awaitTermination()"""
 
 
 

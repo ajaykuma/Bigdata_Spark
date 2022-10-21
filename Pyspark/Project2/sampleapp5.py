@@ -5,15 +5,13 @@ spark = SparkSession.builder.master("local").appName("sparkdfex").getOrCreate()
 spark.conf.set("spark.sql.shuffle.partitions","2")
 
 inputpath = "Data2/*.json"
-
-x = spark.read.json("Data2",multiLine=True)
+"""x = spark.read.json("Data2",multiLine=True)
 x.printSchema()
-
 x.write.saveAsTable("Data15")
 y = spark.read.load("spark-warehouse/Data15")
-y.show(5)
+y.show(5)"""
 
-"""with streaming
+"""with streaming"""
 spark.conf.set("spark.sql.streaming.schemaInference","true")
 inputDF = spark.readStream. \
                option("maxBytesPerTrigger",10000).\
@@ -29,7 +27,7 @@ print(type(query))
 
 import time
 time.sleep(100)
-query.stop()"""
+query.stop()
 
 """OR"""
 """query.awaitTermination()"""

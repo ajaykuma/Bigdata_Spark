@@ -10,7 +10,7 @@ Pair RDD: data > (K,V) Ex: This is my content---> This, This is my content.
 
 
 Ex1:
-x = sc.textFile("mydata/mydata-local1/abc1.txt")
+x = sc.textFile("/sampledata/abc1.txt")
 y = x.map(lambda n: (n.split(" "))).map(lambda n: (n[0],n))
 grouped = y.groupByKey().mapValues(list)
 grouped.collect()
@@ -18,7 +18,7 @@ count = y.groupByKey().count()
 
 Ex2:
 option1:
-x = sc.textFile("mydata/mydata-local1/abc1.txt")
+x = sc.textFile("/sampledata/abc1.txt")
 pairrdd = x.map(lambda n: n.split(" ")).map(lambda n: (n[0],n))
 pairrdd.first()
 
@@ -28,7 +28,7 @@ for i in pairrdd.keys().take(10):
 for i in pairrdd.values().take(10):
 ...     print(i)
 
-y = sc.textFile("mydata/mydata-local1/abc2.txt")
+y = sc.textFile("/sampledata/abc2.txt")
 pairrdd2 = y.map(lambda n: n.split(" ")).map(lambda n: (n[0],n))
 
 for i in pairrdd.take(20):
@@ -43,7 +43,7 @@ for i in pairrdd2.sortByKey().take(20):
 ...     print(i)
 
 option2:
-x = sc.textFile("mydata/mydata-local1/abc1.txt")
+x = sc.textFile("/sampledata/abc1.txt")
 result = x.map(lambda n: n.split(" ")).sortBy(lambda n: n[0])
 for i in pairrdd.sortBy(lambda n: n[0]).take(20):
 ...     print(i)
@@ -67,8 +67,8 @@ for i in reduced.take(10):
 ...     print(i)
 
 Ex3:
-x = sc.textFile("mydata/mydata-local1/abc1.txt")
-y = sc.textFile("mydata/mydata-local1/abc2.txt")
+x = sc.textFile("/sampledata/abc1.txt")
+y = sc.textFile("/sampledata/abc2.txt")
 
 pairrdd = x.map(lambda n: n.split(" ")).map(lambda n: (n[0],n))
 pairrdd2 = y.map(lambda n: n.split(" ")).map(lambda n: (n[0],n))

@@ -1,3 +1,20 @@
+--to write data into HDFS download the datasets repo from
+https://github.com/ajaykuma/datasets and unzip
+
+--you should have a directory now 'Datasets-master'
+cp Datasets-master/abc1.txt Datasets-master/abc2.txt
+(--also edit abc2.txt and add few more lines)
+
+hdfs dfs -mkdir /sampledata
+hdfs dfs -put Datasets-master/abc1.txt /sampledata
+hdfs dfs -put Datasets-master/abc2.txt /sampledata
+hdfs dfs -put Datasets-master/recipes.json /sampledata
+hdfs dfs -put Datasets-master/people.json /sampledata
+hdfs dfs -put Datasets-master/customers.json /sampledata
+hdfs dfs -put Datasets-master/auction.csv /sampledata
+hdfs dfs -put Datasets-master/Bank_full.csv /sampledata
+hdfs dfs -put Datasets-master/cv000_29416.txt /sampledata
+
 #Set 1
 Pyspark
 
@@ -5,7 +22,7 @@ Pyspark
 --RDD way
 --Reading a file from HDFS/local filesystem
 ##
-x = sc.textFile("mydata/mydata-local1/abc1.txt")
+x = sc.textFile("/sampledata/abc1.txt")
 
 type(x)
 for i in x.take(5):
@@ -16,7 +33,7 @@ x.collect()
 
 --Dataframe way
 ##
-y = spark.read.format("text").load("mydata/mydata-local1/abc1.txt")
+y = spark.read.format("text").load("/sampledata/abc1.txt")
 type(y)
 y.show(1)
 y.first()
@@ -31,22 +48,22 @@ x.toDebugString()
 print(x.toDebugString())
 
 ##
-x = sc.textFile("mydata/mydata-local1/abc1.txt",4)
+x = sc.textFile("/sampledata/abc1.txt",4)
 print(x.toDebugString())
-(4) mydata/mydata-local1/abc1.txt MapPartitionsRDD[1] at textFile at NativeMethodAccessorImpl.java:0 []
- |  mydata/mydata-local1/abc1.txt HadoopRDD[0] at textFile at NativeMethodAccessorImpl.java:0 []
+(4) /sampledata/abc1.txt MapPartitionsRDD[1] at textFile at NativeMethodAccessorImpl.java:0 []
+ |  /sampledata/abc1.txt HadoopRDD[0] at textFile at NativeMethodAccessorImpl.java:0 []
 x.getNumPartitions()
 x.saveAsTextFile("mydata/rddo1")
 
 --try above option without partition option and then save 
-x = sc.textFile("mydata/mydata-local1/abc1.txt")
+x = sc.textFile("/sampledata/abc1.txt")
 x.getNumPartitions()
 x.saveAsTextFile("mydata/rddo2")
 
 
 --using a different file from HDFS/local filesystem
 ##
-x = sc.textFile("mydata/mydata-local1/Bank_full.csv")
+x = sc.textFile("/sampledata/Bank_full.csv")
 type(x)
 
 for i in x.take(5):
@@ -57,7 +74,7 @@ x.first()
 
 --changing/allocating number of partitions
 ##
-x = sc.textFile("mydata/mydata-local1/Bank_full.csv",3)
+x = sc.textFile("/sampledata/Bank_full.csv",3)
 x.getNumPartitions()
 --refer Spark UI
 
@@ -102,7 +119,7 @@ t = z.filter(lambda n: n == 'E')
 t.count()
 
 Ex2:
-x = sc.textFile("mydata/mydata-local1/cv000_29416.txt")
+x = sc.textFile("/sampledata/cv000_29416.txt")
 y = x.map(lambda n: n.upper())
 y.getNumPartitions()
 y.first()
@@ -128,7 +145,7 @@ c.toDebugString()
 
 Ex3:
 --Using lambda and chaining transformations
-sc.textFile("mydata/mydata-local1/Bank_full.csv",3).map(lambda n: n.upper()).map(lambda n: n.lower()).map(lambda n: n.upper()).
+sc.textFile("/sampledata/Bank_full.csv",3).map(lambda n: n.upper()).map(lambda n: n.lower()).map(lambda n: n.upper()).
 map(lambda n: (n,1)).map(lambda n: (n,100)).first()
 
 Ex4:
