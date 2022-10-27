@@ -50,7 +50,7 @@ def extract_data(spark):
     :param spark: Spark session object.
     :return: Spark DataFrame.
     """
-    file_location = "file:///C:\\Users\\AJ\\Downloads\\Project1\\data"
+    file_location = "file:///C:\\Users\\Win10\\Downloads\\Project1\\data"
     df = spark.read.format("json").load(file_location)
     return df
 
@@ -119,7 +119,7 @@ def load_data(df):
         .write.format("csv") \
         .option("header","true") \
         .mode("overwrite") \
-        .save("file:///C:\\Users\\AJ\\Downloads\\Project1\\data\\Finalreport")
+        .save("file:///C:\\Users\\Win10\\Downloads\\Project1\\data\\Finalreport")
     """df.toPandas().to_csv("Users\\AJ\\Downloads\\Project1\\data\\report.csv")"""
     print(df.count())
     return None
