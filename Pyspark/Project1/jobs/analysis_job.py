@@ -50,7 +50,7 @@ def extract_data(spark):
     :param spark: Spark session object.
     :return: Spark DataFrame.
     """
-    file_location = "C:\\Users\\Win10\\Downloads\\Project2\\Data2\\recipes.json"
+    file_location = "file:///C:\\Users\\AJ\\Downloads\\Project1\\data"
     df = spark.read.format("json").load(file_location)
     return df
 
@@ -119,8 +119,9 @@ def load_data(df):
         .write.format("csv") \
         .option("header","true") \
         .mode("overwrite") \
-        .save("C:\\Users\\Win10\\Desktop\\Finalreport")
-    """df.toPandas().to_csv("C:\\Users\\Win10\\Desktop\\report.csv")"""
+        .save("file:///C:\\Users\\AJ\\Downloads\\Project1\\data\\Finalreport")
+    """df.toPandas().to_csv("Users\\AJ\\Downloads\\Project1\\data\\report.csv")"""
+    print(df.count())
     return None
 
 # entry point for PySpark ETL application
