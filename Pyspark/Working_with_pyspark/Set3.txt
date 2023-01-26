@@ -88,8 +88,6 @@ pairrdd.join(pairrdd2)
 #Additional way to create pairRDD
 >>> x = sc.textFile("/sampledata/abc1.txt")
 >>> paira = x.map(lambda n: (n.split(" ")[0],n))
->>> paira.collect
-<bound method RDD.collect of PythonRDD[2] at RDD at PythonRDD.scala:53>
 >>> paira.collect()
 [('This', 'This is my sample file'), ('which', 'which I want to test'), ('This', 'This is a new file')]
 >>> y = sc.textFile("/sampledata/abc2.txt")
