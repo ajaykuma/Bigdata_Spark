@@ -1,3 +1,4 @@
+--to be customized for scala
 #Set 3
 
 Pair RDD: data > (K,V) Ex: This is my content---> This, This is my content.

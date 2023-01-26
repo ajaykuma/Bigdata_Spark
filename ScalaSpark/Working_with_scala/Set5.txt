@@ -1,3 +1,5 @@
+--to be customized for scala
+
 #Set 5
 x = spark.read.format("csv").option("header","true").option("inferSchema","true").load("I:\\GitContent\\Datasets\\Datasets\\Bank_full.csv")
 x.columns
