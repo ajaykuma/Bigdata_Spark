@@ -79,25 +79,22 @@ for i in union_data.take(50):
 union_data.getNumPartitions()
 pairrdd.getNumPartitions()
 pairrdd2.getNumPartitions()
-pairrdd.subtract(pairrdd2)
-pairrdd.intersection(pairrdd2)
 pairrdd.zip(pairrdd2)
 pairrdd.join(pairrdd2)
 
 
 #Additional way to create pairRDD
->>> x = sc.textFile("/sampledata/abc1.txt")
->>> paira = x.map(lambda n: (n.split(" ")[0],n))
->>> paira.collect()
-[('This', 'This is my sample file'), ('which', 'which I want to test'), ('This', 'This is a new file')]
->>> y = sc.textFile("/sampledata/abc2.txt")
->>> pairb = y.map(lambda n: (n.split(" ")[0],n))
->>> pairb.collect()
-[('This', 'This content is new'), ('I', 'I want to use'), ('which', 'which I want to test'), ('This', 'This is a new file'), ('This', 'This and that is same')]
->>> paira.intersection(pairb).collect()
-[('which', 'which I want to test'), ('This', 'This is a new file')]
->>> pairb.subtract(paira).collect()
-[('This', 'This and that is same'), ('This', 'This content is new'), ('I', 'I want to use')]
+x = sc.textFile("/sampledata/abc1.txt")
+paira = x.map(lambda n: (n.split(" ")[0],n))
+paira.collect()
+
+y = sc.textFile("/sampledata/abc2.txt")
+pairb = y.map(lambda n: (n.split(" ")[0],n))
+pairb.collect()
+
+paira.intersection(pairb).collect()
+
+pairb.subtract(paira).collect()
 
 --Building Applications(examples)
 PyCharm:
