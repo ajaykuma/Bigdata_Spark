@@ -82,6 +82,7 @@ StorageLevel.DISK_ONLY_2
 >>> x = sc.textFile("/sampledata/abc1.txt",4)
 >>> y = x.flatMap(lambda n: n.split(" "))
 >>> z = y.map(lambda word: (word,1))
+>>> z.collect()
 
 >>> z.persist(StorageLevel.DISK_ONLY)
 result is 'PythonRDD - Disk serialized 1x Replicated'
@@ -89,6 +90,7 @@ result is 'PythonRDD - Disk serialized 1x Replicated'
 >>> z.unpersist()
 
 >>> z.persist(StorageLevel.MEMORY_ONLY)
+>>> z = y.filter(lambda n: len(n)>6).map(lambda n: (n,1)).persist(StorageLevel.MEMORY_ONLY)
 result is 'PythonRDD - Memory serialized 1x Replicated'
 
 >>> z.persist(StorageLevel.MEMORY_AND_DISK_ONLY)
