@@ -79,11 +79,13 @@ for i in union_data.take(50):
 union_data.getNumPartitions()
 pairrdd.getNumPartitions()
 pairrdd2.getNumPartitions()
+
+#note: zip throws an error if both rdds don't have same number of elements
 pairrdd.zip(pairrdd2)
 pairrdd.join(pairrdd2)
 
 
-#Additional way to create pairRDD
+#Additional way to create pairRDD,espescially when using functions such as subtract,intersection etc
 x = sc.textFile("/sampledata/abc1.txt")
 paira = x.map(lambda n: (n.split(" ")[0],n))
 paira.collect()

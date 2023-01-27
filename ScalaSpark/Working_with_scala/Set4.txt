@@ -1,21 +1,20 @@
---to be customized for scala
 #Set 4
 #DataFrame
 
 Ex1:
 --using file from hdfs and using SparkSession which is available as 'spark' ie dataframe api (schemaRDD)
->>> x = spark.read.load("mydata/mydata-local1/Bank_full.csv")
+>>> val x = spark.read.load("/sampledata/Bank_full.csv")
 --will fail as data is not in parquet
 
->>> x = spark.read.load("mydata/mydata-local1/users.parquet")
+>>> val x = spark.read.load("/sampledata/users.parquet")
 >>> x.first()
 
->>> x = spark.read.format("csv").load("mydata/mydata-local1/Bank_full.csv")
+>>> val x = spark.read.format("csv").load("/sampledata/Bank_full.csv")
 
->>> type(x)
-<class 'pyspark.sql.dataframe.DataFrame'>
+>>> x
+res0: org.apache.spark.sql.DataFrame = [_c0: string, _c1: string ... 16 more fields]
 
->>> x.printSchema()
+>>> x.printSchema
 root
  |-- _c0: string (nullable = true)
  |-- _c1: string (nullable = true)
@@ -36,12 +35,9 @@ root
  |-- _c16: string (nullable = true)
  |-- _c17: string (nullable = true)
 
->>> x = spark.read.format("csv").option("header","true").option("delimiter",",").option("inferSchema","true").load("mydata/mydata-local1/Bank_full.csv")
+>>>val x = spark.read.format("csv").option("header","true").option("delimiter",",").option("inferSchema","true").load("/sampledata/Bank_full.csv")
 
->>> type(x)                                                                                                                                          
-<class 'pyspark.sql.dataframe.DataFrame'>
-
->>> x.printSchema()root
+>>> x.printSchema
  |-- serNo: integer (nullable = true)
  |-- age: integer (nullable = true)
  |-- job: string (nullable = true)
@@ -61,90 +57,64 @@ root
  |-- poutcome: string (nullable = true)
  |-- y: string (nullable = true)
 
->>>x.filter(x.marital == 'married')
-
->>>x.filter(x.marital == 'married').count()
+x.filter(x("marital") === "married").show(10)
+x.filter(x("marital") === "married").count()
 
 Ex2:
 Option1:
 option 2: directly reading json file
->>> df = spark.read.json("mydata/mydata-local1/people.json")
+>>> val df = spark.read.json("/sampledata/people.json")
 
 >>> df.show()
 
 >>> df.printSchema()
 
->>> df.select("age")
+>>> df.select("age").show()
 
->>> df.select("age","address")
+>>> df.select("age","address").show()
 
->>> df.select(df['age'])
+>>> df.select(df("age")).show()
 
->>> df.select(df['age'] > 30)
+>>> df.select(df("age") > 30).show()
 
->>> df.filter(df['age'] > 30)
+>>> df.filter(df("age") > 30).show()
 
->>> df.groupBy("age").count()
+>>> df.groupBy("age").count().show()
 
---if database ajmydb exists
->>>df.groupBy("age").count().write.saveAsTable("ajmydb.dbmyfirstdf")
+>>>df.groupBy("age").count().write.saveAsTable("dbmyfirstdf")
 or
->>> df.groupBy("age").count().write.mode("overwrite").saveAsTable("ajmydb.dbmyfirstdf")
-
---if not
-df.groupBy("age").count().write.saveAsTable("dbmyfirstdf")
+>>> df.groupBy("age").count().write.mode('overwrite').saveAsTable("dbmyfirstdf")
+--to be checked
 
 --using hive if database exists
 >>>spark.sql("use ajmydb")
 
 or
->>> x = spark.sql("select * from dbmyfirstdf limit 10")
->>> type(x)
-<class 'pyspark.sql.dataframe.DataFrame'>
+>>> val x = spark.sql("select * from dbmyfirstdf limit 10")
 x = spark.sql("select * from dbmyfirstdf limit 10").show(2)
 
 Option2:
 option 1.1: defining schema and reading json file
 
-from pyspark.sql import SparkSession
-from pyspark.sql.types import IntegerType,StringType,StructType,StructField
-spark = SparkSession.builder.appName("testdfapp").getOrCreate()
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.types._
 
-myschema = StructType([StructField("id",IntegerType(),True),
-                       StructField("name",StringType(),True),
-                       StructField("age",IntegerType(),True),
-                       StructField("city",StringType(),True),
-                       StructField("address",StringType(),True)])
-people = spark.read.schema(myschema).json("mydata/mydata-local1/people.json")
+val schema = new StructType().
+      add("id", IntegerType, true).
+      add("name", StringType, true).
+      add("age", IntegerType, true).
+      add("city", StringType, true).
+      add("address", StringType, true)
+
+val people = spark.read.schema(myschema).json("/sampledata/people.json")
 people.show()
 
 [--if using a multiline json file
-"""recipes = spark.read.option("multiLine","true").json("mydata/mydata-local1/recipes2.json")"""]
+val recipes = spark.read.option("multiline","true").json("/sampledata/recipes-orig.json")
 
-Option 1.2
-from pyspark.sql import SparkSession
-from pyspark.sql.types import IntegerType,StringType,StructType,StructField
-spark = SparkSession.builder.appName("testdfapp").config("spark.sql.warehouse.dir","/user/win10/spark-warehouse").getOrCreate()
-
-myschema = StructType([StructField("id",IntegerType(),True),
-                       StructField("name",StringType(),True),
-                       StructField("age",IntegerType(),True),
-                       StructField("city",StringType(),True),
-                       StructField("address",StringType(),True)])
-people = spark.read.schema(myschema).json("mydata/mydata-local1/people.json")
-people.show()
-people.write.saveAsTable("peopledf1")
-
-
---if using Hive/if database exists
->>>spark.sql("use ajmydb")
-
---if not then directly
->>>spark.sql("show tables")
->>>spark.sql("select * from dbmyfirstdf").show()
 
 #writes data in parquet
->>> df = spark.read.json("mydata/mydata-local1/people.json")
+>>> val df = spark.read.json("/sampledata/people.json")
 >>> df.groupBy("age").count().write.mode("overwrite").save("dbmyfirstdf")
 
 #write the data in json
@@ -159,35 +129,24 @@ people.write.saveAsTable("peopledf1")
 >>> spark.sql("select * from global_temp.people1").show()
 >>> spark.newSession().sql("select * from global_temp.people1").show()
 
-Ex3:
->>> df = spark.read.format("csv").option("inferSchema","true").option("header","true").load("mydata/mydata-local1/Bank_full.csv")
->>> df.show(5)
->>> df.columns
->>> df[df.age > 80].show()
->>> df[df.age > 80].count()
->>>df.summary().show()
-
 write the df in different formats
 >>> df.rdd.getNumPartitions() 
 >>> df.write.format("json").mode("overwrite").save("dbmyfirstdf2")
 >>> df2 = spark.read.json("dbmyfirstdf2/part-00000-0b8ce26e-ddfe-4388-a16a-d652edd66d97-c000.json")                                     
+
+>>>val df = spark.read.format("csv").option("header","true").option("delimiter",",").option("inferSchema","true").load("/sampledata/Bank_full.csv")
 >>> df2.show(2)
 
->>> df.filter(df['balance'] > 2000).count()
->>> df.filter((df['balance'] > 2000) & (df.marital == 'married')).count()
->>> df.filter((df['balance'] > 2000) & (df.marital == 'married') & (df.education == 'tertiary')).count()
->>> df.filter((df['balance'] > 2000) & (df.marital == 'married') & (df.education == 'tertiary')).show(10)
->>> df.filter((df['balance'] > 2000) & (df.marital == 'married') & (df.education == 'tertiary')).sort('balance',ascending=False).show(10)
->>> df.filter((df['balance'] > 2000) & (df.marital == 'married') & (df.education == 'tertiary')) \
-... .groupBy('job').count()
->>> df.filter((df['balance'] > 2000) & (df.marital == 'married') & (df.education == 'tertiary')) \
-... .groupBy('job').count().sort('count',ascending=False).show(5)
->>> selecteddf = df.filter((df['balance'] > 2000) & (df.marital == 'married') & (df.education == 'tertiary')) \
-... .groupBy('job').count().sort('count',ascending=False)
->>> df.count()
->>> selecteddf.count()
->>>df.groupBy(df.job).count()
+>>> df.filter(df("balance") > 2000).count()
+>>> df.filter(df("balance") > 2000 and (df("marital") === "married")).count()
+>>> df.filter(df("balance") > 2000 and (df("marital") === "married") and (df("education") === "tertiary")).count() 
+>>> df.filter(df("balance") > 2000 and (df("marital") === "married") and (df("education") === "tertiary")).show(10)
+>>> df.filter(df("balance") > 2000 and (df("marital") === "married") and (df("education") === "tertiary")).sort(df("balance")).show(10) 
+>>> df.filter(df("balance") > 2000 and (df("marital") === "married") and (df("education") === "tertiary")).sort(df("balance")).groupBy(df("job")).count().show()
+>>> df.filter(df("balance") > 2000 and (df("marital") === "married") and (df("education") === "tertiary")).sort(df("balance")).groupBy(df("job")).count().sort("count").show()
+>>> df.filter(df("balance") > 2000 and (df("marital") === "married") and (df("education") === "tertiary")).sort(df("balance")).groupBy(df("job")).count().sort(desc("count")).show()
 
+---to be customized for scala
 >>> from pyspark.sql.functions import countDistinct
 >>> df.select(countDistinct('job'))
 >>> df[(df.age.isin(['35','25','45','55']))].show(10)

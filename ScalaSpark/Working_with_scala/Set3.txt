@@ -1,4 +1,3 @@
---to be customized for scala
 #Set 3
 
 Pair RDD: data > (K,V) Ex: This is my content---> This, This is my content.
@@ -10,106 +9,47 @@ Pair RDD: data > (K,V) Ex: This is my content---> This, This is my content.
 -zip/sub/union/join/...
 
 
-Ex1:
+val x = sc.textFile("/sampledata/abc1.txt")
+val paira = x.map(n => (n.split(" ")(0),n))
+paira.collect()
+val groupeda = paira.groupByKey()
+groupeda.collect()
+groupeda.keys.take(10).foreach(println)
+groupeda.values.take(10).foreach(println)
+
+val y = sc.textFile("/sampledata/abc2.txt")
+val pairb = y.map(n => (n.split(" ")(0),n))
+pairb.collect()
+val groupedb = pairb.groupByKey()
+groupedb.collect()
+groupedb.keys.take(10).foreach(println)
+groupedb.values.take(10).foreach(println)
+
+paira.sortByKey().take(20).foreach(println)
+pairb.sortByKey().take(20).foreach(println)
+paira.sortByKey(false).take(20).foreach(println)
+
 x = sc.textFile("/sampledata/abc1.txt")
-y = x.map(lambda n: (n.split(" "))).map(lambda n: (n[0],n))
-grouped = y.groupByKey().mapValues(list)
-grouped.collect()
-count = y.groupByKey().count()
+val result = x.map(n => n.split(" ")).sortBy(n => n(0))
+OR
+val result = x.map(n => n.split(" ")).sortBy(n => n(0),false)
+result.collect()
 
-Ex2:
-option1:
-x = sc.textFile("/sampledata/abc1.txt")
-pairrdd = x.map(lambda n: n.split(" ")).map(lambda n: (n[0],n))
-pairrdd.first()
+paira.countByKey().take(5).foreach(println)
+pairb.countByKey().take(5).foreach(println)
 
-for i in pairrdd.keys().take(10):
-...     print(i)
+#this may not be useful here as we cant reduce the content based on key. 
+val reduced = paira.reduceByKey(_+_)
 
-for i in pairrdd.values().take(10):
-...     print(i)
-
-y = sc.textFile("/sampledata/abc2.txt")
-pairrdd2 = y.map(lambda n: n.split(" ")).map(lambda n: (n[0],n))
-
-for i in pairrdd.take(20):
-...     print(i)
-for i in pairrdd2.take(20):
-...     print(i)
-
-
-for i in pairrdd.sortByKey().take(20):
-...     print(i)
-for i in pairrdd2.sortByKey().take(20):
-...     print(i)
-
-option2:
-x = sc.textFile("/sampledata/abc1.txt")
-result = x.map(lambda n: n.split(" ")).sortBy(lambda n: n[0])
-for i in pairrdd.sortBy(lambda n: n[0]).take(20):
-...     print(i)
-
-option3:
-for i in pairrdd.sortByKey(True, 1).take(5):
-...     print(i)
-
-result = pairrdd.sortByKey(ascending=True).values()
-for i in result.take(20):
-...     print(i)
-
-result1 = pairrdd.sortByKey(ascending=False).values()
-for i in result1.take(20):
-...     print(i)
-
-pairrdd.countByKey().items()
-
-reduced = pairrdd.reduceByKey(lambda a,b: a+b)
-for i in reduced.take(10):
-...     print(i)
-
-Ex3:
-x = sc.textFile("/sampledata/abc1.txt")
-y = sc.textFile("/sampledata/abc2.txt")
-
-pairrdd = x.map(lambda n: n.split(" ")).map(lambda n: (n[0],n))
-pairrdd2 = y.map(lambda n: n.split(" ")).map(lambda n: (n[0],n))
-union_data = pairrdd.union(pairrdd2)
+val union_data = paira.union(pairb)
 union_data.collect()
-for i in union_data.take(50):
-...     print(i)
-union_data.getNumPartitions()
-pairrdd.getNumPartitions()
-pairrdd2.getNumPartitions()
-pairrdd.subtract(pairrdd2)
-pairrdd.intersection(pairrdd2)
-pairrdd.zip(pairrdd2)
-pairrdd.join(pairrdd2)
+union_data.getNumPartitions
+paira.getNumPartitions
+pairb.getNumPartitions
 
-
---Building Applications(examples)
-PyCharm:
-
-testapp1.py
-
-from pyspark import SparkConf, SparkContext
-sc = SparkContext(master="local",appName="testAppl")
-mydata = sc.textFile("file:///D:\\GitContent\\Datasets\\Datasets\\cv000_29416.txt",2)
-step1 = mydata.map(lambda n: n.upper())
-print(step1.collect())
-print("number of partitions:", mydata.getNumPartitions())
-
---Run application from command line
-spark-submit --master local --deploy-mode client --driver-memory 1g --executor-memory 500m --executor-cores 1 testapp1.py
-
-testapp2.py
-from pyspark.sql import SparkSession
-spark = SparkSession.builder.master("local").appName("sparkdfex").getOrCreate()
-x = spark.read.format("json").option("inferSchema","true").option("header","true").\
-        load("file:///D:\\GitContent\\Datasets\\Datasets\\employees.json")
-x.show(10)
-x.printSchema()
-
---Run application from command line
-spark-submit --master local --deploy-mode client --driver-memory 1g --executor-memory 500m --executor-cores 1 testapp2.py
+pairb.subtract(paira).collect()
+pairb.intersection(paira).collect()
+paira.zip(pairb)
+paira.join(pairb).collect()
 
 =====================================
