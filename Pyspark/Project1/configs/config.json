@@ -1,7 +1,0 @@
-{
-  "file_location" : "C:\\Users\\AJ\\Downloads\\Project1\\data",
-  "file_type" : "json",
-  "infer_schema" : "true",
-  "first_row_is_header" :"true",
-  "delimiter" : ","
-}
