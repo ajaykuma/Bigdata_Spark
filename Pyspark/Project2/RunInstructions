@@ -1,0 +1,21 @@
+"""
+This application be run in Local Mode or with YARN
+ Settings for YARN: (If Hadoop and Spark using YARN is already setup)
+ --If using Pycharm set run > Edit Configurations
+   HADOOP_HOME=C:\Hadoop\hadoop-2.6.5
+   HADOOP_COMMON_HOME=C:\Hadoop\hadoop-2.6.5
+   HADOOP_CONF_DIR=C:\Hadoop\hadoop-2.6.5\etc\hadoop
+   YARN_CONF_DIR=C:\spark-2.4.3-bin-hadoop2.6\conf\yarn-conf
+
+ --Start Hadoop
+ --Run application from your IDE
+"""
+"""
+To run from command line using spark-submit
+--Open terminal
+--Run application local mode
+spark-submit.cmd --master local TestApp1.py
+
+--Run application on YARN (default is YARN)
+spark-submit.cmd TestApp1.py
+"""

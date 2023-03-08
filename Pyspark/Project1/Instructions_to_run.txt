@@ -1,0 +1,27 @@
+--My local machine has a local Hadoop setup and spark pointing to YARN
+--Dataset 'receipes.json' can be found in 'Datasets' repository
+
+Option 1: Running Application in local mode (no YARN)
+C:\Users\Win10>spark-submit.cmd --master local --py-files C:\\Users\\Win10\\Downloads\\Project1\\dependencies.zip --files C:\\Users\\Win10\\Downloads\\Project1\\configs\\config.json C:\\Users\\Win10\\Downloads\\Project1\\jobs\\analysis_job.py
+
+#Spark configuration in spark-default.conf
+----
+spark.master                         yarn
+spark.eventLog.enabled               true
+spark.eventLog.dir                   hdfs://0.0.0.0:19000/spark2/ApplicationHistory
+spark.history.fs.logDirectory        hdfs://0.0.0.0:19000/spark2/ApplicationHistory
+spark.serializer                     org.apache.spark.serializer.KryoSerializer
+spark.driver.memory                  5g
+spark.executor.extraJavaOptions      -XX:+PrintGCDetails -Dkey=value -Dnumbers="one two three"
+spark.history.provider               org.apache.spark.deploy.history.FsHistoryProvider
+spark.history.fs.update.interval     30s
+
+---- If it complains about YARN_CONF_DIR not set, issue the following from command line before submitting the appl
+#Spark-env.sh
+set HADOOP_HOME=C:\Hadoop\hadoop-2.6.5
+set HADOOP_COMMON_HOME=C:\Hadoop\hadoop-2.6.5
+set HADOOP_CONF_DIR=C:\Hadoop\hadoop-2.6.5\etc\hadoop
+set YARN_CONF_DIR=C:\spark-2.4.3-bin-hadoop2.6\conf\yarn-conf
+
+Option 2: Running Application in YARN
+C:\Users\Win10>spark-submit.cmd --py-files C:\\Users\\Win10\\Downloads\\Project1\\dependencies.zip --files C:\\Users\\Win10\\Downloads\\Project1\\configs\\config.json C:\\Users\\Win10\\Downloads\\Project1\\jobs\\analysis_job.py
