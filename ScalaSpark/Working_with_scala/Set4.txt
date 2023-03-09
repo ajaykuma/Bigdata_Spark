@@ -223,3 +223,54 @@ write the df with overwrite n append options
 write the df in a hive table
 
 ================
+#Dataset example
+
+scala> val x = spark.read.text("/sampledata/abc1.txt").as[String]
+x: org.apache.spark.sql.Dataset[String] = [value: string]
+
+scala> x
+res1: org.apache.spark.sql.Dataset[String] = [value: string]
+
+scala> x.flatMap(n => n.split(" ")).groupByKey(_.toLowerCase).count
+res5: org.apache.spark.sql.Dataset[(String, Long)] = [value: string, count(1): bigint]
+
+scala> x.flatMap(n => n.split(" ")).groupByKey(_.toLowerCase).count.show()
+
+------------
+#Using reflective approach
+scala> case class Person(name: String, age: Int)
+defined class Person
+
+scala> val peopleDF = sc.textFile("/sampledata/people.txt").map(_.split(",")).map(p => Person(p(0),p(1).trim.toInt))
+peopleDF: org.apache.spark.rdd.RDD[Person] = MapPartitionsRDD[14] at map at <console>:26
+
+scala> val peopleDF1 = peopleDF.toDF()
+peopleDF1: org.apache.spark.sql.DataFrame = [name: string, age: int]
+
+scala> peopleDF1.createOrReplaceTempView("people")
+
+scala> teenagersDF.map(t => "Name:" + t(0)).collect().foreach(println)
+
+scala> teenagersDF.map(t => "Name:" + t.getAs[String]("name")).collect().foreach(println)
+
+scala> teenagersDF.map(_.getValuesMap[Any](List("Name","age"))).collect().foreach(println)
+
+#Using Programmatic approach
+val people = sc.textFile("/sampledata/people.txt")
+val schemaString = "name age"
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.types.{StructType, StructField, StringType}
+val schema = StructType( schemaString.split(" ").map(fieldName => StructField(fieldName, StringType, true)))
+val rowRDD = people.map(_.split(",")).map(p => Row(p(0), p(1).trim))
+val peopleDataFrame = spark.createDataFrame(rowRDD, schema)
+peopleDataFrame.createOrReplaceTempView("people")
+spark.sql("select * from people").show()
+
+---------
+#schema is description of the structure of data 
+val schemaUntyped = new StructType().add("name", "String").add("age", "Int")
+
+#Describe schema of strongly typed datasets using Encoders
+import org.apache.spark.sql.Encoders
+case class Person(id: Long, name: String)
+Encoders.product[Person].schema
