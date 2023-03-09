@@ -1,6 +1,103 @@
 #Set 4
 #DataFrame
 
+#creating dataframes
+
+scala> import spark.implicits._
+import spark.implicits._
+
+scala> val columns = Seq("ProgLang","developers")
+
+scala> columns
+
+scala> val data = Seq(("Go","5000"),("Python","1000"),("Scala","10000"))
+
+scala> data
+
+scala> val data1 = sc.parallelize(data)
+
+scala> val df = data1.toDF()
+df: org.apache.spark.sql.DataFrame = [_1: string, _2: string]
+
+scala> df.printSchema
+root
+ |-- _1: string (nullable = true)
+ |-- _2: string (nullable = true)
+
+
+scala> val df = data1.toDF("ProgLang","developers")
+df: org.apache.spark.sql.DataFrame = [ProgLang: string, developers: string]
+
+scala> df.show()
+
+#using createDataFrame
+scala> val df2 = spark.createDataFrame(data1).toDF(columns:_*)
+df2: org.apache.spark.sql.DataFrame = [ProgLang: string, developers: string]
+
+scala> df2.show()
+
+#using Row RDD and schema
+scala> import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
+
+scala> import org.apache.spark.sql.Row
+import org.apache.spark.sql.Row
+
+scala> val schema = StructType (Array (
+     |                StructField("ProgLang", StringType, true),
+     |                StructField("developers", StringType, true)))
+schema: org.apache.spark.sql.types.StructType = StructType(StructField(ProgLang,StringType,true), StructField(developers,StringType,true))
+
+scala> val rowRDD = data1.map(attr => Row(attr._1, attr._2))
+rowRDD: org.apache.spark.rdd.RDD[org.apache.spark.sql.Row] = MapPartitionsRDD[9] at map at <console>:30
+
+scala> val df3 = spark.createData
+createDataFrame   createDataset
+
+scala> val df3 = spark.createDataFrame(rowRDD, schema)
+df3: org.apache.spark.sql.DataFrame = [ProgLang: string, developers: string]
+
+scala> df3.show()
+
+----------------
+#working with file 'After_Markings_SMPC522A1DC0040_SE-PGA454_20171012_082108_FileInfo.txt'
+--refer the metadata on top 
+category,startRow,nRows,type
+environmentMetaData,13,2,emd
+fileMetaData,15,2,fmd
+systemMetaData,17,2,smd
+vehicleInformationMetaData,19,2,vimd
+visionMetaData,21,2,vmd
+Pedestrian,23,219,Pedestrian
+TwoWheeler,242,925,TwoWheeler
+Unclassified3DMarking,1167,2721,Unclassified3DMarking
+Vehicle,3888,2474,Vehicle
+
+--let's create dataframe by extracting 'pedestrian' data ie 
+columns from row number 23
+data is 218 rows from row #24
+
+#specifying columns
+scala> val columns = "frameNumber,streamName,refId,objectType,height,direction,movement,occlusion,headOccluded,feetOccluded,overlapped,unsharp,strangePose,crossing,accessory,topLeftX,topLeftY,topRightX,topRightY,bottomRightX,bottomRightY,bottomLeftX,bottomLeftY,box3DGroundLength,box3DGroundWidth,box3DGroundCenterX,box3DGroundCenterXSigma,box3DGroundCenterY,box3DGroundCenterYSigma,box3DClosestPointX,box3DClosestPointY,box3DOrientationAngle,box3DOrientationAngleSigma,box3DHeight,box3DRelVelocityX,box3DRelVelocityXSigma,box3DRelVelocityY,box3DRelVelocityYSigma,box3DDataSource,box3DLidarInterpolationAge,box3DClassificationQuality,lidarDistanceX,lidarDistanceY,lidarVelocityX,lidarVelocityY,isInvalid,isStatic,ObjectId,Ibeo2MarkingsVersion,IdcOdExtractorVersion,clusterID,faceVisible,leftBorderVisibility,rightBorderVisibility"
+scala> val columns2 = columns.split(",")
+scala> val columns3 = sc.parallelize(columns2)
+scala> columns3.first()
+scala> val x = sc.textFile("/sampledata/After_Markings_SMPC522A1DC0040_SE-PGA454_20171012_082108_FileInfo.txt")
+scala> val pedes = x.filter(line => line.contains("pedestrian"))
+scala> pedes.saveAsTextFile("file:///home/hdu/outp6")
+scala> val df = spark.read.option("inferSchema","true").csv("file:///home/hdu/outp6/part-00000")
+scala> val df1 = df.toDF(columns.split(","): _*)
+scala> df1.select("frameNumber","streamName","rightBorderVisibility").show(5)
+
+for related examples refer:
+/Bigdata_Spark/Spark_n_Scala/SparkApplicationBasicExamples/ForCluster/MySparkApps
+DfourthApp.scala
+EfifthApp.scala
+FsixthApp.scala
+GseventhApp.scala
+HeighthApp.scala
+-------------
+#Reading and writing different files, different formats
 Ex1:
 --using file from hdfs and using SparkSession which is available as 'spark' ie dataframe api (schemaRDD)
 >>> val x = spark.read.load("/sampledata/Bank_full.csv")
