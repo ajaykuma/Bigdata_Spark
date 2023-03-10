@@ -230,6 +230,77 @@ write the df in different formats
 >>> df.rdd.getNumPartitions() 
 >>> df.write.format("json").mode("overwrite").save("dbmyfirstdf2")
 >>> df2 = spark.read.json("dbmyfirstdf2/part-00000-0b8ce26e-ddfe-4388-a16a-d652edd66d97-c000.json")                                     
+#creating df from xml
+spark-shell --packages com.databricks:spark-xml_2.11:0.12.0 --master local
+scala> val df = spark.read.format("com.databricks.spark.xml").option("rowTag", "book").load("/sampledata/books.xml")
+OR
+scala> val df1 = spark.read.format("xml").option("rowTag", "book").load("/sampledata/books.xml")
+scala> df.show()
+scala> df.show(truncate=false)
+
+#specify multiple packages to work with xml and avro
+spark-shell --packages com.databricks:spark-xml_2.11:0.12.0,org.apache.spark:spark-avro_2.11:2.4.3 --master local
+scala> val df = spark.read.format("xml").option("rowTag", "book").load("/sampledata/books.xml")
+
+scala> df.write.format("avro").save("/sampledata/books")
+
+scala> df.write.format("avro").mode("overwrite").save("/sampledata/books")
+
+scala> val df1 = spark.read.format("avro").load("/sampledata/books/part-00000-ea8b5649-52e4-4359-a396-94a43e7e28f4-c000.avro")
+
+scala> df1.show()
+
+#Spark DataFrameWriter provides partitionBy() function to partition the Avro at the time of writing. Partition improves performance on reading by reducing Disk I/O. 
+scala> val data = Seq(("James ","","Smith",2018,1,"M",3000),
+     |       ("Michael ","Rose","",2010,3,"M",4000),
+     |       ("Robert ","","Williams",2010,3,"M",4000),
+     |       ("Maria ","Anne","Jones",2005,5,"F",4000),
+     |       ("Jen","Mary","Brown",2010,7,"",-1)
+     |     )
+
+scala> val columns = Seq("firstname", "middlename", "lastname", "dob_year",
+     |  "dob_month", "gender", "salary")
+
+scala> import spark.sqlContext.implicits._
+import spark.sqlContext.implicits._
+
+scala> val df = data.toDF(columns:_*)
+
+scala> df.write.partitionBy("dob_year","dob_month")
+res3: org.apache.spark.sql.DataFrameWriter[org.apache.spark.sql.Row] = org.apache.spark.sql.DataFrameWriter@1914bfa1
+
+scala> df.write.partitionBy("dob_year","dob_month").format("avro").save("people")
+                                                                                
+scala> df.write.partitionBy("dob_year","dob_month").format("avro").save("/sampledata/people")
+
+scala> spark.read.format("avro").load("/sampledata/people").where(col("dob_year") === 2010).show()
+
+scala> spark.sql("CREATE TEMPORARY VIEW PERSON USING avro options (path \"/sampledata/people\")") 
+
+scala> spark.sql("SELECT * FROM PERSON").show()
+
+--using avro schemas
+Avro schemas are usually defined with .avsc extension and the format of the file is in JSON. We will store below schema in person.avsc file and provide this file using option() while reading an Avro file. This schema provides the structure of the Avro file with field names and it’s data types.
+
+
+--
+vi person.avsc
+{
+  "type": "record",
+  "name": "Person",
+  "namespace": "com.sparkbyexamples",
+  "fields": [
+    {"name": "firstname","type": "string"},
+    {"name": "middlename","type": "string"},
+    {"name": "lastname","type": "string"},
+    {"name": "dob_year","type": "int"},
+    {"name": "dob_month","type": "int"},
+    {"name": "gender","type": "string"},
+    {"name": "salary","type": "int"}
+  ]
+}
+
+
 
 >>>val df = spark.read.format("csv").option("header","true").option("delimiter",",").option("inferSchema","true").load("/sampledata/Bank_full.csv")
 >>> df2.show(2)
