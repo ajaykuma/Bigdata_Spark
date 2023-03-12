@@ -1,10 +1,11 @@
 """ without streaming """
 from pyspark.sql.types import IntegerType,StringType, StructType, StructField
 from pyspark.sql import SparkSession
+"""Running in local mode"""
 spark = SparkSession.builder.master("local").appName("sparkdfex").getOrCreate()
 spark.conf.set("spark.sql.shuffle.partitions","2")
 
-inputpath = "Data2/*.json"
+inputpath = "/sampledata/Data/*.json"
 """x = spark.read.json("Data2",multiLine=True)
 x.printSchema()
 x.write.saveAsTable("Data15")
@@ -19,7 +20,7 @@ inputDF = spark.readStream. \
                json(inputpath)
 
 query = inputDF.writeStream.\
-        option("numrows",5).\
+        option("numrows",2).\
         format("console").\
         trigger(processingTime='3 seconds'). \
         queryName("counts").outputMode("update").start()

@@ -1,5 +1,6 @@
 from pyspark import SparkConf, SparkContext
 from pyspark.streaming import StreamingContext
+"""Running in local mode"""
 sc = SparkContext(master="local[2]",appName="strmAppl")
 ssc = StreamingContext(sc,10)
 ssc.checkpoint('testtemp')

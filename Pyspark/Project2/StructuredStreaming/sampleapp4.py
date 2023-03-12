@@ -3,11 +3,13 @@ from pyspark.sql.functions import current_timestamp
 from pyspark.sql.types import IntegerType,StringType, StructType, StructField
 
 from pyspark.sql import SparkSession
+"""Running in local mode"""
 spark = SparkSession.builder.master("local").appName("sparkdfex").getOrCreate()
+"""setting additional properties"""
 spark.conf.set("spark.sql.shuffle.partitions","2")
 spark.conf.set("spark.sql.streaming.checkpointLocation","testtemp")
 
-inputpath = "Data"
+inputpath = "/sampledata/Data"
 schema = StructType([StructField("name",StringType(),True),
                      StructField("age",IntegerType())])
 

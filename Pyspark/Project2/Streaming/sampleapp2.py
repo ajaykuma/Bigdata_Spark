@@ -1,6 +1,7 @@
 from pyspark import SparkConf, SparkContext,StorageLevel
 from pyspark.streaming import StreamingContext
-sc = SparkContext(master="local[2]",appName="strmAppl")
+"""Running in local mode"""
+c = SparkContext(master="local[2]",appName="strmAppl")
 ssc = StreamingContext(sc,10)
 ssc.checkpoint('testtemp')
 
