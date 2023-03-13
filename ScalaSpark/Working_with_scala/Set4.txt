@@ -314,77 +314,54 @@ vi person.avsc
 >>> df.filter(df("balance") > 2000 and (df("marital") === "married") and (df("education") === "tertiary")).sort(df("balance")).groupBy(df("job")).count().sort("count").show()
 >>> df.filter(df("balance") > 2000 and (df("marital") === "married") and (df("education") === "tertiary")).sort(df("balance")).groupBy(df("job")).count().sort(desc("count")).show()
 
----to be customized for scala
->>> from pyspark.sql.functions import countDistinct
->>> df.select(countDistinct('job'))
->>> df[(df.age.isin(['35','25','45','55']))].show(10)
->>>df.groupBy(['age','y']).count()
+scala> bankDF.select(bankDF("marital")).distinct.show()
+
+scala> val subscCount = bankDF.filter(bankDF("y") === "yes").count().toDouble
+subscCount: Double = 5289.0
+
+scala> val totCount = bankDF.count().toDouble
+totCount: Double = 45211.0
+
+scala> val sucRate = subscCount/totCount
+sucRate: Double = 0.11698480458295547
+
+scala> val sucRate = subscCount/totCount * 100
+sucRate: Double = 11.698480458295547
+
+scala> val falRate = 100 - sucRate
+falRate: Double = 88.30151954170445
+
+scala> bankDF.groupBy(bankDF("marital"),bankDF("age"),bankDF("y")).count().filter((col("count") > 500) and (col("marital") === "married")).show()
+
 
 --task(sort the above group by result in descending order of count and find top 10 counts)
 
->>>df.groupBy(['marital','age','y']).count()
->>>df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).show()
+scala> bankDF.groupBy(bankDF("marital"),bankDF("age"),bankDF("y")).count().filter((col("count") > 500) and (col("marital") === "married")).sort(desc("marital")).show()
 
->>>from pyspark.sql.functions import avg,collect_list
->>>df.select(collect_list("job")).show()
->>>df.select(avg("balance"))
+scala> bankDF.groupBy(bankDF("marital"),bankDF("age"),bankDF("y")).count().filter((col("count") > 500) and (col("marital") === "married")).
+write.option("header","true").
+mode("overwrite").
+csv("/sampledata/myfirstdf4")
 
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).\
-... write.option("header","true").\
-... mode("overwrite").\
-... csv("myfirstdf4")
+scala> val df = bankDF.groupBy(bankDF("marital"),bankDF("age"),bankDF("y")).count().filter((col("count") > 500) and (col("marital") === "married")).sort(desc("marital"))
+scala> df.rdd.getNumPartitions()
 
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).rdd.getNumPartitions()
->>> df.rdd.getNumPartitions()
+>>> df.
+write.option("header","true").
+partitionBy("marital").
+mode("overwrite").
+csv("/sampledata/myfirstdf5")
 
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).\
-... write.option("header","true").\
-... partitionBy("marital").\
-... mode("overwrite").\
-... csv("myfirstdf5")
 
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).\
-... write.option("header","true").\
-... partitionBy("age").\
-... mode("overwrite").\
-... csv("myfirstdf5")
+scala> newdf = spark.read.option("inferSchema","true").option("header","true").csv("/sampledata/myfirstdf5/marital=married")
 
->>> df.\                                               
-... write.option("header","true").\
-... partitionBy("job").\
-... mode("overwrite").\
-... csv("myfirstdf6")
 
->>> newdf = spark.read.option("inferSchema","true").option("header","true").csv("myfirstdf6/job=admin.")
-
->>> newdf.columns
-
->>> df.columns
-
->>> newdf.show(10)
-
->>> df.groupBy(['marital','age','y']).count().filter((col("count") > 500) & ((col("marital") == 'married')).\
-... repartition(1).\
-... write.option("header","true").\
-... partitionBy("marital").\
-... mode("overwrite").\
-... csv("myfirstdf7")
-
->>> from pyspark.sql.functions import udf
->>> from pyspark.sql.functions import UserDefinedFunction
-
-create your function:
->>> def agegroup(x):
-...     if x>50:
-...             return 'old'
-...     else:
-...             return 'young'
-... 
-
->>> from pyspark.sql.types import StringType
->>>udf = UserDefinedFunction(lambda x: agegroup(x), StringType())
->>>newdf = df.withColumn('age',udf(df.age))
->>> df = df.withColumn('ageGroup',udf(df.age))
+scala> bankDF.groupBy(bankDF("marital"),bankDF("age"),bankDF("y")).count().filter((col("count") > 500) and (col("marital") === "married")). 
+repartition(1).
+write.option("header","true").
+partitionBy("marital").
+mode("overwrite").
+csv("/sampledata/myfirstdf7")
 
 -------------------------------------------
 write the df with overwrite n append options
