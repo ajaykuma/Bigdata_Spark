@@ -1,3 +1,11 @@
+#Accumulator example:
+
+   scala >  val accum = sc.longAccumulator("SumAccumulator")
+   scala > sc.parallelize(Array(1, 2, 3)).foreach(x => accum.add(x))
+    OR   
+   scala > sc.parallelize(1 to 10000).foreach(x => accum.add(x))
+   scala > println(accum.value)
+
 
 #Spark broadcast variables: immutable shared variables which are cached on each worker node on a cluster
 When to use Broadcast variable?
