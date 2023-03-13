@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 """from pyspark.sql.functions import col, lit, udf"""
 from pyspark.sql.functions import udf
 spark = SparkSession.builder\
-    .appName("sparkdfex6")\
+    .appName("sparkdfex3")\
     .master("local[*]")\
     .getOrCreate()
 
