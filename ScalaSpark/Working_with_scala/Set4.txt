@@ -442,3 +442,100 @@ val schemaUntyped = new StructType().add("name", "String").add("age", "Int")
 import org.apache.spark.sql.Encoders
 case class Person(id: Long, name: String)
 Encoders.product[Person].schema
+
+#
+--creating emp and dept DF
+
+  val emp = Seq((1,"Smith",-1,"2018","10","M",3000),
+    (2,"Rose",1,"2010","20","M",4000),
+    (3,"Williams",1,"2010","10","M",1000),
+    (4,"Jones",2,"2005","10","F",2000),
+    (5,"Brown",2,"2010","40","",-1),
+      (6,"Brown",2,"2010","50","",-1)
+  )
+  val empColumns = Seq("emp_id","name","superior_emp_id","year_joined",
+       "emp_dept_id","gender","salary")
+  import spark.sqlContext.implicits._
+  val empDF = emp.toDF(empColumns:_*)
+  empDF.show(false)
+
+  val dept = Seq(("Finance",10),
+    ("Marketing",20),
+    ("Sales",30),
+    ("IT",40)
+  )
+
+  val deptColumns = Seq("dept_name","dept_id")
+  val deptDF = dept.toDF(deptColumns:_*)
+  deptDF.show(false)
+
+#Inner Join
+Inner join is the default join and commonly  used, It is used to join two DataFrames/Datasets on key columns, and where keys don’t match the rows get dropped from both datasets (emp & dept).
+
+empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"inner")
+    .show(false)
+
+#Full Outer Join
+Outer i.e. full, fullouter join returns all rows from both Spark DataFrame/Datasets, where join expression doesn’t match it returns null on respective record columns.
+
+  empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"outer")
+    .show(false)
+  empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"full")
+    .show(false)
+  empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"fullouter")
+    .show(false)
+
+#Left Outer Join
+Spark Left i.e. Left Outer join returns all rows from the left DataFrame/Dataset regardless of match found on the right dataset when join expression doesn’t match, it assigns null for that record and drops records from right where match not found.
+
+
+  empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"left")
+    .show(false)
+  empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"leftouter")
+    .show(false)
+
+#Right outer join
+Spark Right i.e.  Right Outer join is opposite of left join, here it returns all rows from the right DataFrame/Dataset regardless of math found on the left dataset, when join expression doesn’t match, it assigns null for that record and drops records from left where match not found.
+
+  empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"right")
+   .show(false)
+  empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"rightouter")
+   .show(false)
+
+#Left semi join
+
+Left Semi join is similar to inner join difference being leftsemi join returns all columns from the left DataFrame/Dataset and ignores all columns from the right dataset. In other words, this join returns columns from the only left dataset for the records match in the right dataset on join expression, records not matched on join expression are ignored from both left and right datasets.
+
+
+  empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"leftsemi")
+    .show(false)
+
+#Left Anti join
+Left Anti join does the exact opposite of the Spark leftsemi join, leftanti join returns only columns from the left DataFrame/Dataset for non-matched records.
+
+  empDF.join(deptDF,empDF("emp_dept_id") ===  deptDF("dept_id"),"leftanti")
+    .show(false)
+
+#Self Join
+Spark Joins are not complete without a self join, Though there is no self-join type available, we can use any of the above-explained join types to join DataFrame to itself. 
+
+  empDF.as("emp1").join(empDF.as("emp2"),
+    col("emp1.superior_emp_id") === col("emp2.emp_id"),"inner")
+    .select(col("emp1.emp_id"),col("emp1.name"),
+      col("emp2.emp_id").as("superior_emp_id"),
+      col("emp2.name").as("superior_emp_name"))
+      .show(false)
+
+
+#Using SQL Expression
+
+  empDF.createOrReplaceTempView("EMP")
+  deptDF.createOrReplaceTempView("DEPT")
+//SQL JOIN
+  val joinDF = spark.sql("select * from EMP e, DEPT d where e.emp_dept_id == d.dept_id")
+  joinDF.show(false)
+
+  val joinDF2 = spark.sql("select * from EMP e INNER JOIN DEPT d ON e.emp_dept_id == d.dept_id")
+  joinDF2.show(false)
+
+

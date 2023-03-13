@@ -26,3 +26,4 @@ inputDF = spark.read.format("csv").option("header","true").option("inferSchema",
 inputDF.show(3)
 inputDF.printSchema()
 
+"""To be updated with more examples"""

@@ -1,4 +1,4 @@
-"""Broadcast variable example1"""
+"""Accumulator variable example"""
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
