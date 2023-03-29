@@ -11,7 +11,7 @@ val sparkVersion = "2.2.0"
 
 
 resolvers ++= Seq(
-    "apache-snapshots" at "http://repository.apache.org/snapshots/"
+    "apache-snapshots" at "https://repository.apache.org/snapshots/"
 )
 
 

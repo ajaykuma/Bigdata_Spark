@@ -25,7 +25,7 @@ and place these in
 HADOOP_HOME=<pathofhadoop>
 
 Running Spark-shell
-C:\spark-2.4.3-bin-hadoop2.7>.\bin\spark-shell2
+C:\spark-2.4.3-bin-hadoop2.7>.\bin\spark-shell.cmd
 
 scala> val x = sc.textFile("cv000_29416.txt")
 x: org.apache.spark.rdd.RDD[String] = cv000_29416.txt MapPartitionsRDD[1] at textFile at <console>:24
