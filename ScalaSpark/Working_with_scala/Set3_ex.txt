@@ -1,0 +1,170 @@
+#Set 3
+
+Pair RDD: data > (K,V) Ex: This is my content---> This, This is my content.
+-groupBy
+-reduceBY
+-groupByKey
+-reduceByKey
+-countByKey
+-zip/subtract/intersection/union/join/...
+
+scala> val x = sc.textFile("file:///home/hdu/abc1.txt")
+x: org.apache.spark.rdd.RDD[String] = file:///home/hdu/abc1.txt MapPartitionsRDD[50] at textFile at <console>:24
+
+--creating pair RDD using map
+scala> val y = x.map(n => (n.split(" ")(0),n))
+y: org.apache.spark.rdd.RDD[(String, String)] = MapPartitionsRDD[51] at map at <console>:25
+
+--using zipWithIndex to add line numbers
+scala> val z = x.zipWithIndex
+z: org.apache.spark.rdd.RDD[(String, Long)] = ZippedWithIndexRDD[52] at zipWithIndex at <console>:25
+
+--creating pair RDD
+scala> val pair = z.map(n => (n._2,n._1))
+pair: org.apache.spark.rdd.RDD[(Long, String)] = MapPartitionsRDD[53] at map at <console>:25
+
+
+scala> y.take(2).foreach(println)
+(this,this is a test file)
+(this,this is not for example)
+
+scala> z.take(2).foreach(println)
+(this is a test file,0)
+(this is not for example,1)
+
+scala> pair.take(2).foreach(println)
+(0,this is a test file)
+(1,this is not for example)
+
+--looking at keys only
+scala> y.keys.take(2).foreach(println)
+this
+this
+
+scala> z.keys.take(2).foreach(println)
+this is a test file
+this is not for example
+
+scala> pair.keys.take(2).foreach(println)
+0
+1
+
+--operation on single RDD
+--using key to sort
+scala> y.sortByKey().take(10).foreach(println)
+(important,important is seeing examples)
+(is,is it not important to use a file)
+(then,then what to do)
+(this,this is a test file)
+(this,this is not for example)
+(this,this is a new file)
+(this,this is a test file)
+
+--operation on single RDD
+--providing function to select key for operations
+scala> x.sortBy(n => (n.split(" ")(0))).take(10).foreach(println)
+important is seeing examples
+is it not important to use a file
+then what to do
+this is a test file
+this is not for example
+this is a new file
+this is a test file
+
+--operation on single RDD
+--similarly for groupBy
+scala> y.groupByKey().take(10).foreach(println)
+(this,CompactBuffer(this is a test file, this is not for example, this is a new file, this is a test file))
+(is,CompactBuffer(is it not important to use a file))
+(then,CompactBuffer(then what to do))
+(important,CompactBuffer(important is seeing examples))
+
+--operation on single RDD
+scala> x.groupBy(n => (n.split(" ")(0))).take(10).foreach(println)
+(this,CompactBuffer(this is a test file, this is not for example, this is a new file, this is a test file))
+(is,CompactBuffer(is it not important to use a file))
+(then,CompactBuffer(then what to do))
+(important,CompactBuffer(important is seeing examples))
+
+--for countByKey
+scala> y.countByKey()
+res19: scala.collection.Map[String,Long] = Map(this -> 4, is -> 1, then -> 1, important -> 1)
+
+--operation on single RDD
+scala> y.distinct.collect
+res16: Array[(String, String)] = Array((then,then what to do), (this,this is not for example), (is,is it not important to use a file), (important,important is seeing examples), (this,this is a new file), (this,this is a test file))
+
+scala> y.take(10).foreach(println)
+(this,this is a test file)
+(this,this is not for example)
+(is,is it not important to use a file)
+(important,important is seeing examples)
+(then,then what to do)
+(this,this is a new file)
+(this,this is a test file)
+
+scala> y.keys.take(10).foreach(println)
+this
+this
+is
+important
+then
+this
+this
+
+scala> y.values.take(10).foreach(println)
+this is a test file
+this is not for example
+is it not important to use a file
+important is seeing examples
+then what to do
+this is a new file
+this is a test file
+
+------------
+--more examples
+
+val x = sc.textFile("/sampledata/abc1.txt")
+val paira = x.map(n => (n.split(" ")(0),n))
+paira.collect()
+val groupeda = paira.groupByKey()
+groupeda.collect()
+groupeda.keys.take(10).foreach(println)
+groupeda.values.take(10).foreach(println)
+
+val y = sc.textFile("/sampledata/abc2.txt")
+val pairb = y.map(n => (n.split(" ")(0),n))
+pairb.collect()
+val groupedb = pairb.groupByKey()
+groupedb.collect()
+groupedb.keys.take(10).foreach(println)
+groupedb.values.take(10).foreach(println)
+
+paira.sortByKey().take(20).foreach(println)
+pairb.sortByKey().take(20).foreach(println)
+paira.sortByKey(false).take(20).foreach(println)
+
+x = sc.textFile("/sampledata/abc1.txt")
+val result = x.map(n => n.split(" ")).sortBy(n => n(0))
+OR
+val result = x.map(n => n.split(" ")).sortBy(n => n(0),false)
+result.collect()
+
+paira.countByKey().take(5).foreach(println)
+pairb.countByKey().take(5).foreach(println)
+
+#this may not be useful here as we cant reduce the content based on key. 
+val reduced = paira.reduceByKey(_+_)
+
+val union_data = paira.union(pairb)
+union_data.collect()
+union_data.getNumPartitions
+paira.getNumPartitions
+pairb.getNumPartitions
+
+pairb.subtract(paira).collect()
+pairb.intersection(paira).collect()
+paira.zip(pairb)
+paira.join(pairb).collect()
+
+

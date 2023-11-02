@@ -1,0 +1,136 @@
+--to write data into HDFS download the datasets repo from
+https://github.com/ajaykuma/Datasets_For_Work
+
+--unzip the directory into home directory
+
+--you should have a directory now 'Datasets-master'
+cp Datasets_For_Work-main/abc1.txt Datasets_For_Work-main/abc2.txt
+(--also edit abc2.txt and add few more lines)
+
+hdfs dfs -mkdir /sampledata
+hdfs dfs -put Datasets-master/abc1.txt /sampledata
+hdfs dfs -put Datasets-master/abc2.txt /sampledata
+hdfs dfs -put Datasets-master/recipes.json /sampledata
+hdfs dfs -put Datasets-master/people.json /sampledata
+hdfs dfs -put Datasets-master/customers.json /sampledata
+hdfs dfs -put Datasets-master/auction.csv /sampledata
+hdfs dfs -put Datasets-master/Bank_full.csv /sampledata
+hdfs dfs -put Datasets-master/cv000_29416.txt /sampledata
+
+#Set 1
+spark-shell
+
+#RDD
+--RDD way
+--Reading a file from HDFS/local filesystem
+##
+--reading from HDFS
+val x = sc.textFile("/sampledata/abc1.txt")
+
+--reading from local machine
+val x = sc.textFile("file:///home/hdu/Datasets_For_Work-main/abc1.txt")
+
+x.first
+x.collect
+--refer Spark UI
+
+--Dataframe way
+##
+val y = spark.read.format("text").load("/sampledata/abc1.txt")
+y.show(1)
+y.first
+y.collect
+
+--to see the number of partitions of RDD
+x.getNumPartitions
+
+--to see lineage
+##
+x.toDebugString
+
+##
+--specifying paramter for partitions
+x = sc.textFile("/sampledata/abc1.txt",4)
+x.toDebugString
+x.getNumPartitions
+x.saveAsTextFile("mydata/rddo1")
+
+--try above option without partition option and then save 
+x = sc.textFile("/sampledata/abc1.txt")
+x.getNumPartitions
+x.saveAsTextFile("mydata/rddo2")
+
+
+--using a different file from HDFS/local filesystem
+##
+x = sc.textFile("/sampledata/Bank_full.csv")
+x.first()
+x.take(10).foreach(println)
+
+--changing/allocating number of partitions
+##
+x = sc.textFile("/sampledata/Bank_full.csv",3)
+x.getNumPartitions
+--refer Spark UI
+
+--No Spark
+##
+val x = 1 to 10
+x.foreach(println)
+
+--Using spark to work on collections
+##
+val y = sc.parallelize(x,2)
+or
+val y = sc.parallelize(1 to 10)
+y.collect
+y.first
+y.count
+y.getNumPartitions
+
+##
+val x = "welcome"
+val y = sc.parallelize(x)
+y.first()
+
+
+--Using anonymous functions
+
+Ex1:
+scala> val x = "welcome"
+
+scala> val y = x.split("")
+
+scala> val z = sc.parallelize(y)
+
+scala> val a = z.map(n => n.toUpperCase)
+
+scala> a.take(10).foreach(println)
+
+a.first()
+val t = a.filter(n => n == "W")
+
+t.count()
+
+Ex2:
+val x = sc.textFile("/sampledata/cv000_29416.txt")
+val y = x.map(n => n.toUpperCase())
+
+y.getNumPartitions
+y.first()
+
+val z = x.map(n => n.toLowerCase())
+z.getNumPartitions
+z.first()
+
+Ex3:
+--Using lambda and parallelize
+val x = 1 to 10
+x
+val y = sc.parallelize(x,2)
+y.getNumPartitions
+val z = y.filter(n => n%2 == 0)
+val a = z.map(n => n*100)
+a.collect()
+
+

@@ -8,7 +8,8 @@ numAs
 numBs
 
 ------------
-Application
+Understanding Application
+--depending on setup we read and save output in HDFS or local location
 
 DAG /Job 0/ Stage 0
 val x = sc.textFile("/sampledata/abc1.txt")
@@ -48,6 +49,44 @@ wordcount.repartition(1).saveAsTextFile("mydata/rddo5")
 
 --When working with directory
 val mydata = sc.wholeTextFiles("/sampledata")
+
+or
+
+val x = sc.wholeTextFiles("file:////usr/local/spark/examples/src/main/resources")
+x: org.apache.spark.rdd.RDD[(String, String)] = file:////usr/local/spark/examples/src/main/resources MapPartitionsRDD[1] at wholeTextFiles at <console>:24
+
+x.getNumPartitions
+res0: Int = 1
+
+x.keys
+res1: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[2] at keys at <console>:26
+
+x.keys.take(10).foreach(println)
+file:/usr/local/spark/examples/src/main/resources/people.json                   
+file:/usr/local/spark/examples/src/main/resources/user.avsc
+file:/usr/local/spark/examples/src/main/resources/users.avro
+file:/usr/local/spark/examples/src/main/resources/kv1.txt
+file:/usr/local/spark/examples/src/main/resources/users.orc
+file:/usr/local/spark/examples/src/main/resources/users.parquet
+file:/usr/local/spark/examples/src/main/resources/people.csv
+file:/usr/local/spark/examples/src/main/resources/employees.json
+file:/usr/local/spark/examples/src/main/resources/full_user.avsc
+file:/usr/local/spark/examples/src/main/resources/people.txt
+
+x.values.take(10).foreach(println)
+
+--searching for a particular key
+x.keys.filter(n => n.contains("people")).take(5).foreach(println)
+file:/usr/local/spark/examples/src/main/resources/people.json
+file:/usr/local/spark/examples/src/main/resources/people.csv
+file:/usr/local/spark/examples/src/main/resources/people.txt
+
+--looking at key and value
+x.take(1).foreach(println)
+(file:/usr/local/spark/examples/src/main/resources/people.json,{"name":"Michael"}
+{"name":"Andy", "age":30}
+{"name":"Justin", "age":19}
+)
 
 --caching
 val x = sc.textFile("/sampledata/abc1.txt",4).flatMap(n => n.split(" ")).map(word => (word,1)).cache()

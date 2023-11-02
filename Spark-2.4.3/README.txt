@@ -8,7 +8,7 @@ spark-env.sh (to be edit with hadoop related paths as per setup)
 yarn-conf(folder contains hadoop & hive related configs)
 (the config files for hadoop & hive need to be edited as per setup)
 
---once copied we work with spark 2.4.3 
+--once copied we work with spark 2.4.3 or any other version with relevant changes
 pyspark (provided python is setup)
 spark-shell 
 spark-submit

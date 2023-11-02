@@ -1,13 +1,7 @@
 name := "Simple Project"
-  
-
 version := "1.1.2"
-
-
 scalaVersion := "2.11.8"
-
-
-val sparkVersion = "2.2.0"
+val sparkVersion = "2.4.3"
 
 
 resolvers ++= Seq(

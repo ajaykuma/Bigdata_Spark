@@ -1,4 +1,4 @@
-#Setup Spark Stand alone cluster ( no dependency on Hadoop)
+#Setup Spark Stand alone cluster (no dependency on Hadoop)
 1.Setup two ubuntu machines that can ping each other, have firewall disabled,
 can ssh each other (password less) & have connectivity to internet & Oracle JDK 1.8/openJDK installed 
 
@@ -8,6 +8,8 @@ can ssh each other (password less) & have connectivity to internet & Oracle JDK 
   cd /usr/local
   sudo tar -xvf /home/hdu/Downloads/spark-2.4.3-bin-hadoop2.7.tgz
   sudo ln -s spark-2.4.3-bin-hadoop2.7 spark
+
+Note** change ownership as per your desired user.
   sudo chown -R hdu:hdu spark*
 
 4.Make sure to update your user specific .bashrc with Java & Spark paths
