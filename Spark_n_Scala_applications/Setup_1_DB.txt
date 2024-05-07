@@ -1,0 +1,96 @@
+
+Regarding the content of the training, I just need an introduction to databricks and a bit of advice regarding SQL, no need for details about loading data to data lake or security or job cluster. The most important is getting started and working with the data (+SQL tips).
+
+# Apache Spark
+A unified, open source, parallel, data processing framework for Big Data Analytics
+
+Spark unifies
+Batch processing
+Interactive SQL
+Real-time processing
+Machine learning
+Deep learning
+Graph processing
+
+# Databricks:
+
+
+--to create account
+https://www.databricks.com/try-databricks
+
+--community edition
+https://community.cloud.databricks.com/login.html
+
+--portal.azure.com (using your outlook account)
+pay as you go (with initial trial & credits)
+
+--to look at pricing
+https://azure.microsoft.com/en-us/pricing/details/databricks/#pricing
+
+
+About Databricks:
+Commercial product from the creators of Apache Spark
+Complete development env for Apache Spark
+Numerous proprietary spark enhancements
+Ideal for Data Science team collaboration
+Many development tools
+Optimized for cloud
+
+Portal> click on + and choose 'azure databricks'
+create a resource > resource group
+RG : is a container : rg_newwrk
+Instance Details:
+Workspace name: newwrk
+Region: Genrmany west central
+Pricing Tier: Premium(+role based controls)
+
+Networking:
+Deploy Azure Databricks workspace with Secure Cluster Connectivity (No Public IP)
+Yes   	No
+Deploy Azure Databricks workspace in your own Virtual Network (VNet)
+Yes   	No
+
+defaults and same for all tabs
+Review & create..
+
+Creating RG creates other default RGs for 'NetworkWatcher', 'your RG', 'RG for other defaults such as storage, vm etc'
+
+Note** Azure Databricks automatically integrates with azure AD.
+
+Launch workspace>
+Option 1:
+Policy > Personal compute
+Scala 2.12,Spark 3.3.2
+Standard_DS3_v2 14gb mem, 4 cores
+
+(here driver and worker is same node)
+
+Create compute.. After its done
+
+click on + and create notebook (which will be attached to the compute/cluster)
+
+Note**
+azure portal > Azure Databricks user interface > IDE: Notebook
+Data: Integrated Blob file system > automatically attached to underlying BLOB storage 
+Clusters : Create cluster on fly/use/delete etc
+Jobs: Job scheduler
+Secure collaboration : Share notebooks/share clusters & other permissions related.
+Language extensions: dbutils or fs.mount
+
+Now lets add data into 'Data' folder 
+New > Data sources > Upload files to volume > choose 'mywork' > default > create volume 'mydata' > choose and upload a file
+We can get path of the file using 'Catalog Explorer'
+
+in notebook>
+x = spark.read.csv("/Volumes/mywork/default/mydata")
+type(x)
+
+--Using Sql directly by creating a table from a file.
+create/modify table using 'auction.csv' file
+
+Now we can query this table directly
+
+--in form of table
+using SQL  > %sql
+
+
