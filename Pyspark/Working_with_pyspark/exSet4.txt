@@ -266,3 +266,28 @@ write the df with overwrite n append options
 write the df in a hive table
 
 ================
+
+#Another example of UDF on spark-Sql
+
+create table using file 'recipes.json'
+--read into Df and save as table
+--create table using file externally (say hive)
+--create table in Databricks (from UI) using a file
+
+>>> spark.sql("select * from recipes_json").show(2)
+
+or in notebook
+%sql
+select cookTime,datePublished,prepTime from recipes_json
+
+--create a function
+def testf(x):
+  return x[2:]
+
+
+--register function
+spark.udf.register('testf',testf)
+
+%sql
+select testf(cookTime) from recipes_json
+
