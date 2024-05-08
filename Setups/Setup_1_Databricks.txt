@@ -1,6 +1,3 @@
-
-Regarding the content of the training, I just need an introduction to databricks and a bit of advice regarding SQL, no need for details about loading data to data lake or security or job cluster. The most important is getting started and working with the data (+SQL tips).
-
 # Apache Spark
 A unified, open source, parallel, data processing framework for Big Data Analytics
 

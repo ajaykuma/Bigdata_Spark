@@ -1,0 +1,64 @@
+Spark with hive
+--------------
+--Download spark spark-3.2.0-bin-hadoop3.2
+--check in spark/jars folders for hive related jars
+for example:
+hdu@mh1:~$ ls /usr/local/spark/jars/hiv*
+/usr/local/spark/jars/hive-beeline-2.3.9.jar      /usr/local/spark/jars/hive-service-rpc-3.1.2.jar
+/usr/local/spark/jars/hive-cli-2.3.9.jar          /usr/local/spark/jars/hive-shims-0.23-2.3.9.jar
+/usr/local/spark/jars/hive-common-2.3.9.jar       /usr/local/spark/jars/hive-shims-2.3.9.jar
+/usr/local/spark/jars/hive-exec-2.3.9-core.jar    /usr/local/spark/jars/hive-shims-common-2.3.9.jar
+/usr/local/spark/jars/hive-jdbc-2.3.9.jar         /usr/local/spark/jars/hive-shims-scheduler-2.3.9.jar
+/usr/local/spark/jars/hive-llap-common-2.3.9.jar  /usr/local/spark/jars/hive-storage-api-2.7.2.jar
+/usr/local/spark/jars/hive-metastore-2.3.9.jar    /usr/local/spark/jars/hive-vector-code-gen-2.3.9.jar
+/usr/local/spark/jars/hive-serde-2.3.9.jar
+
+To have spark store tables, configure a warehouse location.
+By default depends on hive setup and points to hive metastore.
+
+If hive downloaded, its default metastore would be in derby db, stored in metastore_db [in location where hive was started or from where spark interactive shell is started]
+in same location, default path 'spark-warehouse' will be created to store database/tables etc.
+
+If not downloaded, download hive
+for example:
+hive -> apache-hive-2.3.9-bin
+
+If hadoop not setup and hive not being used separately and if hive is only for spark..
+then we don't need to do any additional settings in spark-defaults.conf
+
+if hive path and spark path are configured..
+for example: (in .bashrc)
+
+xport SPARK_HOME=/usr/local/spark
+export PATH=$PATH:$SPARK_HOME/bin
+export HIVE_HOME=/usr/local/hive
+export PATH=$PATH:$HIVE_HOME/bin
+export LD_LIBRARY_PATH=$HADOOP_HOME/lib/native:$LD_LIBRARY_PATH
+export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip:$SPARK_HOME/python/lib/pyspark.zip:$PYTHONPATH
+export PYSPARK_PYTHON=python3.7
+
+Launch pyspark
+Read a csv to create a dataframe
+>>> x = spark.read.csv("/home/hdu/Downloads/auction.csv")
+
+Save it as table
+>>> x.write.saveAsTable("testtbl")
+
+This should save the metadata for table in 'metastore_db' found in location, where pyspark was launched
+Additionaly this will save the data of table in 'spark-warehouse' found in location, where pyspark was launched
+
+<optional>
+we can also configure our own location:
+by editing spark-defaults.conf
+
+spark.sql.warehouse.dir            /home/hdu/mywh
+
+Other examples
+
+spark.sql("show databases").show()
+spark.sql("create database testdb")
+spark.sql("use testdb")
+DataFrame[]
+x.write.saveAsTable("testtbl1")
+
+--Look in warehouse path
