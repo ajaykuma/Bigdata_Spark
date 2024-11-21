@@ -19,7 +19,9 @@ from pyspark.sql.functions import UserDefinedFunction
 from pyspark.sql.types import StringType
 from pyspark.sql.functions import countDistinct
 from pyspark.sql.types import FloatType
-from dependencies.spark import start_spark
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.getOrCreate()
 
 
 def main():
@@ -27,20 +29,12 @@ def main():
        for each category of difficulty (based on time consumed for preparation & cooking)
     :return: None
     """
-    # start Spark application and get Spark session, logger and config
-    spark, log, config = start_spark(
-        app_name='my_analysis_job')
-
-    # log that main analysis job is starting
-    log.warn('analysis_job is up-and-running')
-
     # Analysis pipeline
     data = extract_data(spark)
     data_transformed = transform_data(data)
     load_data(data_transformed)
 
     # log the success and terminate Spark application
-    log.warn('analysis_job is finished')
     spark.stop()
     return None
 
@@ -50,7 +44,7 @@ def extract_data(spark):
     :param spark: Spark session object.
     :return: Spark DataFrame.
     """
-    file_location = "file:///C:\\Users\\Win10\\Downloads\\Project1\\data"
+    file_location = "/home/hdu/my-venv/dags/data"
     df = spark.read.format("json").load(file_location)
     return df
 
@@ -93,7 +87,8 @@ def timeff(x):
     :param x: cookTime/prepTime recipes.
     :return: time in minutes.
     """
-    n = pd.to_timedelta(x)
+    y = x.lower()
+    n = pd.to_timedelta(y)
     return n/np.timedelta64(1, 'm')
 
 def difficulty(x):
@@ -119,7 +114,7 @@ def load_data(df):
         .write.format("csv") \
         .option("header","true") \
         .mode("overwrite") \
-        .save("file:///C:\\Users\\Win10\\Downloads\\Project1\\data\\Finalreport")
+        .save("/home/hdu/dags/sampleoutpt-rec")
     """df.toPandas().to_csv("Users\\AJ\\Downloads\\Project1\\data\\report.csv")"""
     print(df.count())
     return None
